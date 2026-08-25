@@ -2,6 +2,7 @@
 
 import type { ReactNode } from "react";
 
+import { EmptyState } from "@/components/ui/EmptyState";
 import { STATUS_META, type TaskStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -63,9 +64,7 @@ export function TaskColumn({
       </header>
 
       {count === 0 ? (
-        <p className="flex flex-1 items-center justify-center rounded-md border border-dashed border-line px-4 py-8 text-center font-body text-sm text-slate">
-          {meta.emptyState}
-        </p>
+        <EmptyState title={meta.label} message={meta.emptyState} />
       ) : (
         <ul className="flex flex-col gap-2">{children}</ul>
       )}

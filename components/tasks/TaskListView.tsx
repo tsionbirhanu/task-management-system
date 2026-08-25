@@ -2,6 +2,7 @@
 
 import { DueBadge } from "@/components/tasks/DueBadge";
 import { PriorityBadge } from "@/components/tasks/PriorityBadge";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { STATUS_META, formatTicketNumber, type Task } from "@/lib/types";
 
 export interface TaskListViewProps {
@@ -15,9 +16,10 @@ export interface TaskListViewProps {
 export function TaskListView({ tasks = [] }: TaskListViewProps) {
   if (tasks.length === 0) {
     return (
-      <p className="rounded-lg border border-dashed border-line px-4 py-10 text-center font-body text-sm text-slate">
-        No tickets match these filters — clear the search or create a ticket.
-      </p>
+      <EmptyState
+        title="No matching tasks"
+        message="No tickets match these filters. Clear the search or open a new work order."
+      />
     );
   }
 

@@ -21,10 +21,10 @@ export function Toaster() {
           actionButton: "!bg-amber !text-ink !font-body !text-xs !font-medium",
           cancelButton: "!bg-paper/10 !text-paper !font-body !text-xs",
           closeButton: "!bg-ink !border-paper/20 !text-paper",
-          success: "!border-l-4 !border-l-done",
-          error: "!border-l-4 !border-l-danger",
+          success: "!border-l-4 !border-l-done !text-paper",
+          error: "!border-l-4 !border-l-danger !text-paper",
           warning: "!border-l-4 !border-l-amber",
-          info: "!border-l-4 !border-l-progress",
+          info: "!border-l-4 !border-l-slate",
         },
       }}
     />

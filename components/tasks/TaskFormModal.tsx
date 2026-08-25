@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
 import { Modal } from "@/components/ui/Modal";
 import { Select } from "@/components/ui/Select";
+import { Textarea } from "@/components/ui/Textarea";
 import {
   PRIORITY_META,
   STATUS_META,
@@ -56,22 +57,13 @@ export function TaskFormModal({ open, onClose, task }: TaskFormModalProps) {
           defaultValue={task?.title ?? ""}
         />
 
-        <div className="flex w-full flex-col gap-1.5">
-          <label
-            htmlFor="task-description"
-            className="font-body text-xs font-medium text-slate"
-          >
-            Description
-          </label>
-          <textarea
-            id="task-description"
-            name="description"
-            rows={4}
-            defaultValue={task?.description ?? ""}
-            placeholder="What needs doing, and anything the next person should know."
-            className="w-full rounded-md border border-line bg-paper px-3 py-2 font-body text-sm text-ink placeholder:text-slate/60 transition-colors duration-150 ease-out hover:border-slate/40"
-          />
-        </div>
+        <Textarea
+          label="Description"
+          name="description"
+          rows={4}
+          defaultValue={task?.description ?? ""}
+          placeholder="What needs doing, and anything the next person should know."
+        />
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <Select label="Status" name="status" defaultValue={task?.status ?? "todo"}>

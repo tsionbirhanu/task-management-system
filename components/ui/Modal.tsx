@@ -101,7 +101,7 @@ export function Modal({
         tabIndex={-1}
         className={cn(
           "relative w-full max-w-lg rounded-lg border border-line bg-paper",
-          "shadow-lift",
+          "shadow-lift focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
           className,
         )}
       >
@@ -109,7 +109,7 @@ export function Modal({
           <div className="flex flex-col gap-1">
             <h2
               id={headingId}
-              className="font-display text-base font-semibold text-ink"
+            className="font-display text-base font-semibold text-ink"
             >
               {title}
             </h2>
@@ -123,7 +123,7 @@ export function Modal({
             type="button"
             onClick={onClose}
             aria-label="Close"
-            className="-mr-1 rounded p-1 text-slate transition-colors duration-150 hover:bg-ink/[0.04] hover:text-ink"
+            className="-mr-1 rounded p-1 text-slate transition-colors duration-150 hover:bg-ink/[0.04] hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber"
           >
             <X aria-hidden="true" className="h-4 w-4" />
           </button>

@@ -48,6 +48,7 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
             "h-10 w-full appearance-none rounded-md border bg-paper",
             "pl-3 pr-9 font-body text-sm text-ink",
             "transition-colors duration-150 ease-out",
+            "focus-visible:border-amber focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
             error ? "border-danger" : "border-line hover:border-slate/40",
             className,
           )}

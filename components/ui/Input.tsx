@@ -40,6 +40,7 @@ export const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
           "h-10 w-full rounded-md border bg-paper px-3 text-sm text-ink",
           "placeholder:text-slate/60",
           "transition-colors duration-150 ease-out",
+          "focus-visible:border-amber focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
           mono ? "font-mono" : "font-body",
           error ? "border-danger" : "border-line hover:border-slate/40",
           className,

@@ -2,10 +2,12 @@ import type { ReactNode } from "react";
 
 import { cn } from "@/lib/utils";
 
+export type BadgeColor = "slate" | "amber" | "done" | "danger";
 export type BadgeTone = "neutral" | "amber" | "done" | "danger" | "progress";
 
 export interface BadgeProps {
   tone?: BadgeTone;
+  color?: BadgeColor;
   /** Mono is the default: badges carry dates, priorities, and other metadata. */
   mono?: boolean;
   className?: string;
@@ -20,9 +22,17 @@ const TONES: Record<BadgeTone, string> = {
   progress: "border-progress/30 bg-progress/10 text-progress",
 };
 
+const COLORS: Record<BadgeColor, string> = {
+  slate: TONES.neutral,
+  amber: TONES.amber,
+  done: TONES.done,
+  danger: TONES.danger,
+};
+
 /** A small metadata chip. Quiet by design -- the ticket number is the loud part. */
 export function Badge({
   tone = "neutral",
+  color,
   mono = true,
   className,
   children,
@@ -33,7 +43,7 @@ export function Badge({
         "inline-flex items-center gap-1 rounded border px-1.5 py-0.5",
         "text-[11px] font-medium leading-none",
         mono ? "font-mono" : "font-body",
-        TONES[tone],
+        color ? COLORS[color] : TONES[tone],
         className,
       )}
     >

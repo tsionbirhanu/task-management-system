@@ -1,15 +1,15 @@
-import { Badge, type BadgeTone } from "@/components/ui/Badge";
+import { Badge, type BadgeColor } from "@/components/ui/Badge";
 import { PRIORITY_META, type TaskPriority } from "@/lib/types";
 
-const TONES: Record<TaskPriority, BadgeTone> = {
+const COLORS: Record<TaskPriority, BadgeColor> = {
   high: "danger",
   medium: "amber",
-  low: "neutral",
+  low: "slate",
 };
 
 export function PriorityBadge({ priority }: { priority: TaskPriority }) {
   return (
-    <Badge tone={TONES[priority]}>
+    <Badge color={COLORS[priority]}>
       <span className="sr-only">Priority: </span>
       {PRIORITY_META[priority].label}
     </Badge>
