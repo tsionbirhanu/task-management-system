@@ -2,8 +2,6 @@
 
 import { useState } from "react";
 
-import { useRouter } from "next/navigation";
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 
@@ -12,8 +10,12 @@ import { Input } from "@/components/ui/Input";
 import { authClient } from "@/lib/auth/client";
 import { signUpSchema, type SignUpInput } from "@/lib/validation/auth";
 
+const SIGN_UP_FAILED =
+  "We could not create that account. Try a different email address, or sign in if you already have one.";
+const VERIFICATION_EMAIL_FAILED =
+  "Your account was created, but we could not send the confirmation email. Try signing in, then request a new confirmation email.";
+
 export function SignupForm() {
-  const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
 
   const {
@@ -22,32 +24,55 @@ export function SignupForm() {
     formState: { errors, isSubmitting },
   } = useForm<SignUpInput>({
     resolver: zodResolver(signUpSchema),
-    defaultValues: { name: "", email: "", password: "" },
+    defaultValues: { name: "", email: "", password: "", confirmPassword: "" },
   });
 
   async function onSubmit(values: SignUpInput) {
     setFormError(null);
 
-    const { error } = await authClient.signUp.email({
+    const { data, error } = await authClient.signUp.email({
       name: values.name,
       email: values.email,
       password: values.password,
     });
 
     if (error) {
-      setFormError(
-        error.message ??
-          "We could not create that account. Try a different email address.",
-      );
+      setFormError(SIGN_UP_FAILED);
       return;
     }
 
-    router.push("/board");
-    router.refresh();
+    // Ask Neon Auth to send the confirmation message explicitly. Some project
+    // configurations create the user without auto-sending the verification mail.
+    const { error: verificationError } =
+      await authClient.sendVerificationEmail({
+        email: values.email,
+        callbackURL: "/login?created=1",
+      });
+
+    if (verificationError) {
+      setFormError(VERIFICATION_EMAIL_FAILED);
+      return;
+    }
+
+    // A session token comes back only when the project has email confirmation
+    // switched off. Either way, signup should continue through the code screen.
+    const signedInImmediately = Boolean(
+      (data as { token?: string | null } | null)?.token,
+    );
+
+    if (signedInImmediately) await authClient.signOut();
+
+    window.location.assign(
+      `/confirm-email?email=${encodeURIComponent(values.email)}`,
+    );
   }
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="mt-6 flex flex-col gap-4" noValidate>
+    <form
+      onSubmit={handleSubmit(onSubmit)}
+      className="mt-6 flex flex-col gap-4"
+      noValidate
+    >
       <Input
         label="Name"
         autoComplete="name"
@@ -71,9 +96,19 @@ export function SignupForm() {
         error={errors.password?.message}
         {...register("password")}
       />
+      <Input
+        label="Confirm password"
+        type="password"
+        autoComplete="new-password"
+        error={errors.confirmPassword?.message}
+        {...register("confirmPassword")}
+      />
 
       {formError ? (
-        <p role="alert" className="font-body text-sm text-danger">
+        <p
+          role="alert"
+          className="rounded-md border border-danger/30 bg-danger/10 px-3 py-2 font-body text-sm text-danger"
+        >
           {formError}
         </p>
       ) : null}

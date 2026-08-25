@@ -3,6 +3,9 @@ import { redirect } from "next/navigation";
 import { TopBar } from "@/components/layout/TopBar";
 import { getCurrentUser, isAuthConfigured } from "@/lib/auth/session";
 
+/** Reads the session cookie, so it can never be prerendered as static HTML. */
+export const dynamic = "force-dynamic";
+
 export default async function AppLayout({
   children,
 }: {
@@ -14,6 +17,7 @@ export default async function AppLayout({
   if (configured) {
     const user = await getCurrentUser();
     if (!user) redirect("/login");
+    if (!user.emailVerified) redirect("/confirm-email");
     email = user.email;
   }
 
