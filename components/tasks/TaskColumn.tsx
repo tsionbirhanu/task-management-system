@@ -3,6 +3,7 @@
 import type { ReactNode } from "react";
 
 import { Plus } from "lucide-react";
+import { useDroppable } from "@dnd-kit/core";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -23,6 +24,12 @@ const UNDERLINE: Record<TaskStatus, string> = {
   done: "border-b-done",
 };
 
+const OVER_STATE: Record<TaskStatus, string> = {
+  todo: "border-slate/60 bg-ink/[0.02]",
+  in_progress: "border-amber bg-amber/[0.04]",
+  done: "border-done bg-done/[0.04]",
+};
+
 export function TaskColumn({
   status,
   count,
@@ -32,14 +39,16 @@ export function TaskColumn({
 }: TaskColumnProps) {
   const meta = STATUS_META[status];
   const headingId = `column-heading-${status}`;
+  const { setNodeRef } = useDroppable({ id: status });
 
   return (
     <section
+      ref={setNodeRef}
       aria-labelledby={headingId}
       className={cn(
         "flex min-h-[24rem] flex-col rounded-lg border bg-paper/70 p-3",
-        "transition-colors duration-150 ease-out",
-        isOver ? "border-amber bg-amber/[0.04]" : "border-line",
+        "transition-colors duration-150 ease-out motion-reduce:transition-none",
+        isOver ? OVER_STATE[status] : "border-line",
       )}
     >
       <header

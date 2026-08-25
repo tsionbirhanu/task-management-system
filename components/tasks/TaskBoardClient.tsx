@@ -7,13 +7,16 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 
 import { DeleteConfirmDialog } from "@/components/tasks/DeleteConfirmDialog";
-import { FilterBar, type BoardView } from "@/components/tasks/FilterBar";
+import {
+  FilterBar,
+  type BoardView,
+  type TaskSort,
+} from "@/components/tasks/FilterBar";
 import { TaskBoard } from "@/components/tasks/TaskBoard";
 import { TaskFormModal } from "@/components/tasks/TaskFormModal";
 import { TaskListView } from "@/components/tasks/TaskListView";
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
-import { Select } from "@/components/ui/Select";
 import { useTasks, useUpdateTaskStatus } from "@/hooks/useTasks";
 import {
   TASK_PRIORITIES,
@@ -25,7 +28,6 @@ import {
 } from "@/lib/types";
 
 const SORTS = ["created_at", "due_date", "priority"] as const;
-type TaskSort = (typeof SORTS)[number];
 
 function isView(value: string | null): value is BoardView {
   return value === "board" || value === "list";
@@ -63,6 +65,7 @@ export function TaskBoardClient() {
   const filters = useMemo<TaskFilters>(
     () => ({
       q: searchParams.get("search") || undefined,
+      search: searchParams.get("search") || undefined,
       status: isStatus(statusParam) ? statusParam : undefined,
       priority: isPriority(priorityParam) ? priorityParam : undefined,
       sort,
@@ -73,6 +76,10 @@ export function TaskBoardClient() {
   const tasksQuery = useTasks(filters);
   const updateStatus = useUpdateTaskStatus();
   const tasks = tasksQuery.data ?? [];
+  const search = filters.search ?? filters.q;
+  const hasActiveFilters = Boolean(
+    search || filters.status || filters.priority,
+  );
 
   function setParams(next: {
     filters?: TaskFilters;
@@ -104,14 +111,14 @@ export function TaskBoardClient() {
     setFormOpen(true);
   }
 
-  async function moveTask(task: Task, status: TaskStatus) {
-    if (task.status === status) return;
+  async function moveTask(task: Task, status: TaskStatus, position?: number) {
+    if (task.status === status && position === undefined) return;
     const columnSize = tasks.filter((item) => item.status === status).length;
 
     try {
       await updateStatus.mutateAsync({
         id: task.id,
-        input: { status, position: columnSize + 1 },
+        input: { status, position: position ?? columnSize + 1 },
       });
     } catch (error) {
       toast.error(
@@ -140,31 +147,16 @@ export function TaskBoardClient() {
         </div>
 
         <div className="rounded-lg border border-line bg-paper/80 p-3">
-          <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-            <div className="min-w-0 flex-1">
-              <FilterBar
-                filters={filters}
-                onFiltersChange={(nextFilters) =>
-                  setParams({ filters: nextFilters })
-                }
-                view={view}
-                onViewChange={(nextView) => setParams({ view: nextView })}
-              />
-            </div>
-            <Select
-              label="Sort tasks"
-              srOnlyLabel
-              value={sort}
-              onChange={(event) =>
-                setParams({ sort: event.target.value as TaskSort })
-              }
-              className="h-9 w-full lg:w-40"
-            >
-              <option value="created_at">Newest first</option>
-              <option value="due_date">Due date</option>
-              <option value="priority">Priority</option>
-            </Select>
-          </div>
+          <FilterBar
+            filters={filters}
+            onFiltersChange={(nextFilters) =>
+              setParams({ filters: nextFilters })
+            }
+            sort={sort}
+            onSortChange={(nextSort) => setParams({ sort: nextSort })}
+            view={view}
+            onViewChange={(nextView) => setParams({ view: nextView })}
+          />
         </div>
 
         {tasksQuery.isError ? (
@@ -177,6 +169,28 @@ export function TaskBoardClient() {
                 : "Refresh the board and try again."
             }
             action={{ label: "Retry", onClick: () => tasksQuery.refetch() }}
+          />
+        ) : !tasksQuery.isLoading && tasks.length === 0 && hasActiveFilters ? (
+          <EmptyState
+            title="No matching tickets"
+            message={
+              search
+                ? `No tickets match "${search}". Try a different search or clear your filters.`
+                : "No tickets match these filters. Try another status or clear your filters."
+            }
+            action={{
+              label: "Clear filters",
+              onClick: () =>
+                setParams({
+                  filters: {
+                    search: undefined,
+                    q: undefined,
+                    status: undefined,
+                    priority: undefined,
+                  },
+                  sort: "created_at",
+                }),
+            }}
           />
         ) : view === "list" ? (
           <TaskListView

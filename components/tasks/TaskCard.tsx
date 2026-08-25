@@ -45,9 +45,9 @@ export function TaskCard({
       aria-label={`${ticket} ${task.title}`}
       className={cn(
         "group relative overflow-hidden rounded-md border border-line bg-paper",
-        "shadow-ticket transition duration-150 ease-out",
+        "shadow-ticket transition duration-150 ease-out motion-reduce:transition-none",
         isDragging
-          ? "scale-[1.02] border-amber shadow-lift"
+          ? "scale-[1.02] border-amber shadow-lift motion-reduce:scale-100 motion-reduce:shadow-ticket"
           : "hover:border-slate/30 hover:shadow-lift",
         className,
       )}
