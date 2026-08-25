@@ -31,7 +31,7 @@ export function TaskFormModal({ open, onClose, task }: TaskFormModalProps) {
     <Modal
       open={open}
       onClose={onClose}
-      title={editing ? `Edit ${formatTicketNumber(task!.ticket_number)}` : "New ticket"}
+      title={editing ? `Edit ${formatTicketNumber(task!.ticket_no)}` : "New ticket"}
       description={
         editing
           ? "Update the work order and save your changes."

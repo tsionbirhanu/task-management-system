@@ -20,7 +20,7 @@ export function DeleteConfirmDialog({
   task,
   isDeleting = false,
 }: DeleteConfirmDialogProps) {
-  const ticket = task ? formatTicketNumber(task.ticket_number) : "this ticket";
+  const ticket = task ? formatTicketNumber(task.ticket_no) : "this ticket";
 
   return (
     <Modal

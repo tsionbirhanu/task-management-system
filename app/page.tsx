@@ -1,16 +1,11 @@
 import { redirect } from "next/navigation";
 
-import { isSupabaseConfigured } from "@/lib/supabase/env";
-import { createClient } from "@/lib/supabase/server";
+import { getCurrentUser, isAuthConfigured } from "@/lib/auth/session";
 
 export default async function RootPage() {
   // Preview mode: no auth to check, so go straight to the board.
-  if (!isSupabaseConfigured()) redirect("/board");
+  if (!isAuthConfigured()) redirect("/board");
 
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-
+  const user = await getCurrentUser();
   redirect(user ? "/board" : "/login");
 }

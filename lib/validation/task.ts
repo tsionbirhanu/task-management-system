@@ -24,7 +24,7 @@ export const createTaskSchema = z.object({
     .string()
     .trim()
     .min(1, "Give the ticket a title so you can find it later.")
-    .max(120, "Titles are capped at 120 characters - try trimming it down."),
+    .max(200, "Titles are capped at 200 characters - try trimming it down."),
   description: z
     .string()
     .trim()

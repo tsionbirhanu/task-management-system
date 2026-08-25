@@ -41,7 +41,7 @@ export function TaskListView({ tasks = [] }: TaskListViewProps) {
               className="border-b border-line/70 last:border-b-0 hover:bg-ink/[0.02]"
             >
               <td className="px-3 py-2.5 font-mono text-xs text-slate">
-                {formatTicketNumber(task.ticket_number)}
+                {formatTicketNumber(task.ticket_no)}
               </td>
               <td className="px-3 py-2.5 font-body text-sm text-ink">
                 {task.title}

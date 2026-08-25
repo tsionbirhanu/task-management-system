@@ -2,9 +2,12 @@
 
 import { useState } from "react";
 
-import { UserRound } from "lucide-react";
+import { useRouter } from "next/navigation";
+
+import { LogOut, UserRound } from "lucide-react";
 
 import { SearchInput } from "@/components/tasks/SearchInput";
+import { authClient } from "@/lib/auth/client";
 
 export interface TopBarProps {
   /** Signed-in address, or null in preview mode. */
@@ -18,6 +21,13 @@ export interface TopBarProps {
 export function TopBar({ email }: TopBarProps) {
   // Scaffold: local only. Next phase lifts this into the board's filters.
   const [query, setQuery] = useState("");
+  const router = useRouter();
+
+  async function signOut() {
+    await authClient.signOut();
+    router.push("/login");
+    router.refresh();
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-paper/95 backdrop-blur">
@@ -41,13 +51,22 @@ export function TopBar({ email }: TopBarProps) {
           />
         </div>
 
-        <button
-          type="button"
-          className="ml-auto inline-flex shrink-0 items-center gap-2 rounded-md border border-line px-2.5 py-1.5 font-body text-xs text-slate transition-colors duration-150 ease-out hover:border-slate/40 hover:text-ink sm:ml-0"
-        >
-          <UserRound aria-hidden="true" className="h-3.5 w-3.5" />
-          <span className="max-w-[10rem] truncate">{email ?? "Account"}</span>
-        </button>
+        <div className="ml-auto flex shrink-0 items-center gap-2 sm:ml-0">
+          <span className="inline-flex items-center gap-2 rounded-md border border-line px-2.5 py-1.5 font-body text-xs text-slate">
+            <UserRound aria-hidden="true" className="h-3.5 w-3.5" />
+            <span className="max-w-[10rem] truncate">{email ?? "Account"}</span>
+          </span>
+          {email ? (
+            <button
+              type="button"
+              onClick={signOut}
+              className="inline-flex items-center gap-1.5 rounded-md border border-transparent px-2 py-1.5 font-body text-xs text-slate transition-colors duration-150 ease-out hover:bg-ink/[0.04] hover:text-ink"
+            >
+              <LogOut aria-hidden="true" className="h-3.5 w-3.5" />
+              <span className="sr-only sm:not-sr-only">Sign out</span>
+            </button>
+          ) : null}
+        </div>
       </div>
     </header>
   );

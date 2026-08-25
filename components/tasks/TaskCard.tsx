@@ -43,7 +43,7 @@ export function TaskCard({
   isDragging = false,
   className,
 }: TaskCardProps) {
-  const ticket = formatTicketNumber(task.ticket_number);
+  const ticket = formatTicketNumber(task.ticket_no);
 
   return (
     <article

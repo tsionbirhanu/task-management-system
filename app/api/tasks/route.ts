@@ -6,7 +6,7 @@ import { NextResponse } from "next/server";
  *   GET  /api/tasks   list the signed-in user's tickets, filtered by
  *                     ?status= &priority= &q= (validated with taskQuerySchema)
  *   POST /api/tasks   create a ticket from a createTaskSchema body, assigning
- *                     the next ticket_number and a position at the top of the
+ *                     the next ticket_no and a position at the top of the
  *                     To Do column
  *
  * Scaffold: both handlers answer 501 until the Supabase schema and RLS policies
