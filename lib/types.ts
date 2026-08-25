@@ -83,7 +83,8 @@ export function formatTicketNumber(ticketNo: number): string {
 
 /** Shape every API route returns on failure. Errors say what to do next. */
 export interface ApiError {
-  error: string;
-  /** Field-level messages, keyed by form field, for 422 responses. */
-  fields?: Record<string, string[]>;
+  error: {
+    message: string;
+    field?: string;
+  };
 }

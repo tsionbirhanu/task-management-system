@@ -1,28 +1,51 @@
+import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { ZodError, z } from "zod";
 
-/**
- * The drag-and-drop endpoint.
- *
- *   PATCH /api/tasks/:id/status   { status, position? }
- *
- * Split out from the general PATCH on purpose: a card drop is the highest-churn
- * write in the app, it carries a fixed two-field payload (updateTaskStatusSchema),
- * and keeping it separate lets the optimistic update on the client target one
- * narrow mutation instead of the full edit form.
- *
- * `position` is a fractional rank -- the midpoint between the neighbours the
- * card landed between -- so a drop rewrites one row, not the whole column.
- *
- * Scaffold: 501 until the data layer lands.
- */
+import {
+  jsonError,
+  parseJson,
+  serializeTask,
+  validationError,
+} from "@/lib/api/tasks";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getDb, schema } from "@/lib/db";
+import { updateTaskStatusSchema } from "@/lib/validation/task";
 
-const NOT_READY =
-  "This endpoint is not built yet. Moving tickets between columns lands in the next phase.";
+const { tasks } = schema;
+const paramsSchema = z.object({ id: z.string().uuid("Enter a valid task id.") });
 
 interface RouteContext {
   params: { id: string };
 }
 
-export async function PATCH(_request: Request, _context: RouteContext) {
-  return NextResponse.json({ error: NOT_READY }, { status: 501 });
+export async function PATCH(request: Request, context: RouteContext) {
+  try {
+    // Parse
+    const { id } = paramsSchema.parse(context.params);
+    const body = await parseJson(request);
+    const input = updateTaskStatusSchema.parse(body);
+
+    // Authorize
+    const user = await getCurrentUser();
+    if (!user) return jsonError(401, "Sign in to move this task.");
+
+    // Query
+    const [updated] = await getDb()
+      .update(tasks)
+      .set({
+        status: input.status,
+        ...(input.position !== undefined ? { position: input.position } : {}),
+      })
+      .where(and(eq(tasks.id, id), eq(tasks.user_id, user.id)))
+      .returning();
+
+    if (!updated) return jsonError(404, "Task not found.");
+
+    // Respond
+    return NextResponse.json({ task: serializeTask(updated) });
+  } catch (error) {
+    if (error instanceof ZodError) return validationError(error);
+    return jsonError(500, "Something went wrong while moving the task.");
+  }
 }

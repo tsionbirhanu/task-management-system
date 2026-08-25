@@ -1,34 +1,109 @@
+import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
+import { ZodError, z } from "zod";
 
-/**
- * Single work order.
- *
- *   GET    /api/tasks/:id   read one ticket
- *   PATCH  /api/tasks/:id   partial update, validated with updateTaskSchema
- *   DELETE /api/tasks/:id   remove the ticket for good
- *
- * Ownership is enforced by RLS, not by a filter in application code: a request
- * for someone else's ticket returns no rows, which these handlers surface as a
- * 404 rather than leaking that the row exists.
- *
- * Scaffold: 501 until the data layer lands.
- */
+import {
+  jsonError,
+  parseJson,
+  serializeTask,
+  validationError,
+} from "@/lib/api/tasks";
+import { getCurrentUser } from "@/lib/auth/session";
+import { getDb, schema } from "@/lib/db";
+import { updateTaskSchema } from "@/lib/validation/task";
 
-const NOT_READY =
-  "This endpoint is not built yet. Ticket reads, edits, and deletes land in the next phase.";
+const { tasks } = schema;
+const paramsSchema = z.object({ id: z.string().uuid("Enter a valid task id.") });
 
 interface RouteContext {
   params: { id: string };
 }
 
-export async function GET(_request: Request, _context: RouteContext) {
-  return NextResponse.json({ error: NOT_READY }, { status: 501 });
+export async function GET(_request: Request, context: RouteContext) {
+  try {
+    // Parse
+    const { id } = paramsSchema.parse(context.params);
+
+    // Authorize
+    const user = await getCurrentUser();
+    if (!user) return jsonError(401, "Sign in to view this task.");
+
+    // Query
+    const [task] = await getDb()
+      .select()
+      .from(tasks)
+      .where(and(eq(tasks.id, id), eq(tasks.user_id, user.id)))
+      .limit(1);
+
+    if (!task) return jsonError(404, "Task not found.");
+
+    // Respond
+    return NextResponse.json({ task: serializeTask(task) });
+  } catch (error) {
+    if (error instanceof ZodError) return validationError(error);
+    return jsonError(500, "Something went wrong while loading the task.");
+  }
 }
 
-export async function PATCH(_request: Request, _context: RouteContext) {
-  return NextResponse.json({ error: NOT_READY }, { status: 501 });
+export async function PATCH(request: Request, context: RouteContext) {
+  try {
+    // Parse
+    const { id } = paramsSchema.parse(context.params);
+    const body = await parseJson(request);
+    const input = updateTaskSchema.parse(body);
+
+    // Authorize
+    const user = await getCurrentUser();
+    if (!user) return jsonError(401, "Sign in to update this task.");
+
+    // Query
+    const [updated] = await getDb()
+      .update(tasks)
+      .set({
+        ...(input.title !== undefined ? { title: input.title } : {}),
+        ...(input.description !== undefined
+          ? { description: input.description ?? null }
+          : {}),
+        ...(input.status !== undefined ? { status: input.status } : {}),
+        ...(input.priority !== undefined ? { priority: input.priority } : {}),
+        ...(input.due_date !== undefined
+          ? { due_date: input.due_date ? new Date(input.due_date) : null }
+          : {}),
+      })
+      .where(and(eq(tasks.id, id), eq(tasks.user_id, user.id)))
+      .returning();
+
+    if (!updated) return jsonError(404, "Task not found.");
+
+    // Respond
+    return NextResponse.json({ task: serializeTask(updated) });
+  } catch (error) {
+    if (error instanceof ZodError) return validationError(error);
+    return jsonError(500, "Something went wrong while updating the task.");
+  }
 }
 
-export async function DELETE(_request: Request, _context: RouteContext) {
-  return NextResponse.json({ error: NOT_READY }, { status: 501 });
+export async function DELETE(_request: Request, context: RouteContext) {
+  try {
+    // Parse
+    const { id } = paramsSchema.parse(context.params);
+
+    // Authorize
+    const user = await getCurrentUser();
+    if (!user) return jsonError(401, "Sign in to delete this task.");
+
+    // Query
+    const [deleted] = await getDb()
+      .delete(tasks)
+      .where(and(eq(tasks.id, id), eq(tasks.user_id, user.id)))
+      .returning({ id: tasks.id });
+
+    if (!deleted) return jsonError(404, "Task not found.");
+
+    // Respond
+    return new NextResponse(null, { status: 204 });
+  } catch (error) {
+    if (error instanceof ZodError) return validationError(error);
+    return jsonError(500, "Something went wrong while deleting the task.");
+  }
 }

@@ -31,7 +31,7 @@ async function fetchTasks(filters: TaskFilters): Promise<Task[]> {
   if (!response.ok) {
     const body = (await response.json().catch(() => null)) as ApiError | null;
     throw new Error(
-      body?.error ??
+      body?.error?.message ??
         "Could not load your tickets. Check your connection and try again.",
     );
   }
