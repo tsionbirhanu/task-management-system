@@ -2,26 +2,80 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
+@layer base {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    /* Canonical design tokens. */
+    --paper: #faf9f5;
+    --ink: #1b2430;
+    --slate: #5c6470;
+    --amber: #e8a33d;
+    --line: #e4e9f2;
+    --done: #4f9d69;
+    --danger: #d1495b;
+    --progress: #3e6fa8;
+
+    /* Channel triplets mirroring the hex above, so Tailwind can apply opacity
+       modifiers. Change a color here and in the block above, together. */
+    --paper-rgb: 250 249 245;
+    --ink-rgb: 27 36 48;
+    --slate-rgb: 92 100 112;
+    --amber-rgb: 232 163 61;
+    --line-rgb: 228 233 242;
+    --done-rgb: 79 157 105;
+    --danger-rgb: 209 73 91;
+    --progress-rgb: 62 111 168;
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  /* Accessibility floor: the focus ring is amber, visible, and never removed. */
+  :focus-visible {
+    outline: 2px solid var(--amber);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  /* Numeric metadata should never wobble as it counts down. */
+  .font-mono,
+  [class*="font-mono"] {
+    font-variant-numeric: tabular-nums;
   }
 }
 
-body {
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
+@layer utilities {
+  /* Blueprint dot grid: --line at low opacity over --paper. Reads as texture at
+     arm's length, resolves into a drafting grid up close. */
+  .bg-blueprint {
+    background-color: var(--paper);
+    background-image: radial-gradient(rgb(var(--line-rgb) / 0.85) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: -1px -1px;
+  }
+
+  /* The torn-stub perforation: a dashed hairline separating the ticket number
+     from the body of the card. */
+  .perforation {
+    border-bottom: 1px dashed rgb(var(--line-rgb) / 1);
+  }
 }
 
-@layer utilities {
-  .text-balance {
-    text-wrap: balance;
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }
