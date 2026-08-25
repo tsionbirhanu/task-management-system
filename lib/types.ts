@@ -49,7 +49,9 @@ export interface TaskFilters {
   status?: TaskStatus;
   priority?: TaskPriority;
   /** Free-text search across titles, backed by the pg_trgm index. */
+  search?: string;
   q?: string;
+  sort?: "due_date" | "created_at" | "priority";
 }
 
 export const STATUS_META: Record<

@@ -14,12 +14,17 @@ export const taskPrioritySchema = z.enum(TASK_PRIORITIES);
 export const taskSortSchema = z.enum(["due_date", "created_at", "priority"]);
 
 /** Accepts ISO calendar dates or datetimes; stored as timestamptz. */
-const dueDateSchema = z
+const dueDateStringSchema = z
   .string()
   .trim()
   .refine((value) => !Number.isNaN(Date.parse(value)), {
     message: "Enter a valid date, like 2026-09-01.",
   });
+
+const dueDateSchema = z.preprocess(
+  (value) => (value === "" ? undefined : value),
+  dueDateStringSchema.nullish(),
+);
 
 function isNotPastDate(value: string): boolean {
   const due = new Date(value);
@@ -41,11 +46,9 @@ export const createTaskSchema = z.object({
     .nullish(),
   status: taskStatusSchema.default("todo"),
   priority: taskPrioritySchema.default("medium"),
-  due_date: dueDateSchema
-    .refine(isNotPastDate, {
+  due_date: dueDateSchema.refine((value) => !value || isNotPastDate(value), {
       message: "Due date cannot be in the past.",
-    })
-    .nullish(),
+    }),
 });
 
 export const updateTaskSchema = createTaskSchema

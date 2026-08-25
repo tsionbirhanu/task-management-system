@@ -2,6 +2,9 @@
 
 import type { ReactNode } from "react";
 
+import { Plus } from "lucide-react";
+
+import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { STATUS_META, type TaskStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
@@ -9,16 +12,11 @@ import { cn } from "@/lib/utils";
 export interface TaskColumnProps {
   status: TaskStatus;
   count: number;
-  /** True while a dragged card hovers this column. */
   isOver?: boolean;
+  onNewTask?: () => void;
   children?: ReactNode;
 }
 
-/**
- * Columns stay neutral -- a hairline border and a status-colored underline on
- * the header, never a colored background. That keeps the priority accent on
- * each ticket the loudest color in the column.
- */
 const UNDERLINE: Record<TaskStatus, string> = {
   todo: "border-b-slate/50",
   in_progress: "border-b-amber",
@@ -29,6 +27,7 @@ export function TaskColumn({
   status,
   count,
   isOver = false,
+  onNewTask,
   children,
 }: TaskColumnProps) {
   const meta = STATUS_META[status];
@@ -38,29 +37,38 @@ export function TaskColumn({
     <section
       aria-labelledby={headingId}
       className={cn(
-        "flex min-h-[16rem] flex-col rounded-lg border bg-paper/60 p-3",
+        "flex min-h-[24rem] flex-col rounded-lg border bg-paper/70 p-3",
         "transition-colors duration-150 ease-out",
         isOver ? "border-amber bg-amber/[0.04]" : "border-line",
       )}
     >
       <header
         className={cn(
-          "mb-3 flex items-baseline justify-between gap-2 border-b-2 pb-2",
+          "mb-3 flex items-center justify-between gap-2 border-b-2 pb-2",
           UNDERLINE[status],
         )}
       >
-        <h2
-          id={headingId}
-          className="font-display text-sm font-semibold uppercase tracking-wide text-ink"
-        >
-          {meta.label}
-        </h2>
-        <span
-          className="font-mono text-xs text-slate"
-          aria-label={`${count} tickets`}
-        >
-          {String(count).padStart(2, "0")}
-        </span>
+        <div className="flex items-baseline gap-2">
+          <h2
+            id={headingId}
+            className="font-display text-sm font-semibold uppercase tracking-wide text-ink"
+          >
+            {meta.label}
+          </h2>
+          <span
+            className="font-mono text-xs text-slate"
+            aria-label={`${count} tickets`}
+          >
+            {String(count).padStart(2, "0")}
+          </span>
+        </div>
+
+        {status === "todo" && onNewTask ? (
+          <Button variant="ghost" size="sm" onClick={onNewTask}>
+            <Plus aria-hidden="true" className="h-3.5 w-3.5" />
+            New ticket
+          </Button>
+        ) : null}
       </header>
 
       {count === 0 ? (
