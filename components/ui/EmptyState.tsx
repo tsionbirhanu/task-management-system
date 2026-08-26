@@ -21,12 +21,12 @@ export function EmptyState({
   action,
 }: EmptyStateProps) {
   return (
-    <div className="flex min-h-40 flex-col items-center justify-center rounded-md border border-dashed border-line px-4 py-8 text-center">
-      <div className="mb-3 flex h-9 w-9 items-center justify-center rounded-md border border-line bg-paper text-slate">
+    <div className="flex min-h-56 flex-col items-center justify-center rounded-[1.25rem] border border-dashed border-line bg-paper/75 px-5 py-10 text-center shadow-ticket">
+      <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-progress/20 bg-progress/10 text-progress">
         {icon}
       </div>
-      <h3 className="font-display text-sm font-semibold text-ink">{title}</h3>
-      <p className="mt-1 max-w-sm font-body text-sm text-slate">{message}</p>
+      <h3 className="font-display text-base font-bold text-ink">{title}</h3>
+      <p className="mt-2 max-w-sm font-body text-sm leading-6 text-slate">{message}</p>
       {action ? (
         <Button
           type="button"

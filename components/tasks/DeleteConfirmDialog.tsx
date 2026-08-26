@@ -19,17 +19,17 @@ export function DeleteConfirmDialog({
   task,
 }: DeleteConfirmDialogProps) {
   const deleteTask = useDeleteTask();
-  const ticket = task ? formatTicketNumber(task.ticket_no) : "this ticket";
+  const ticket = task ? formatTicketNumber(task.ticket_no) : "this task";
 
   async function onConfirm() {
     if (!task) return;
     try {
       await deleteTask.mutateAsync(task);
-      toast.success("Ticket deleted");
+      toast.success("Task deleted");
       onClose();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Ticket was not deleted.",
+        error instanceof Error ? error.message : "Task was not deleted.",
       );
     }
   }
@@ -38,7 +38,7 @@ export function DeleteConfirmDialog({
     <Modal
       open={open}
       onClose={onClose}
-      title={`Delete ticket ${ticket}?`}
+      title={`Delete task ${ticket}?`}
       description="This can't be undone."
       footer={
         <>
@@ -50,7 +50,7 @@ export function DeleteConfirmDialog({
             onClick={onConfirm}
             disabled={deleteTask.isPending || !task}
           >
-            {deleteTask.isPending ? "Deleting..." : "Delete ticket"}
+            {deleteTask.isPending ? "Deleting..." : "Delete task"}
           </Button>
         </>
       }

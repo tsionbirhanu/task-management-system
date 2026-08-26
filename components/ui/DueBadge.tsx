@@ -1,5 +1,5 @@
 import { AlertTriangle } from "lucide-react";
-import { differenceInCalendarDays, startOfToday } from "date-fns";
+import { differenceInCalendarDays, isPast, startOfToday } from "date-fns";
 
 import { Badge } from "@/components/ui/Badge";
 
@@ -14,16 +14,18 @@ export function DueBadge({ dueDate }: DueBadgeProps) {
   const due = new Date(dueDate);
   if (Number.isNaN(due.getTime())) return null;
 
-  const days = differenceInCalendarDays(due, startOfToday());
+  if (isPast(due)) {
+    const days = Math.max(1, Math.abs(differenceInCalendarDays(due, startOfToday())));
 
-  if (days < 0) {
     return (
       <Badge color="danger" className="animate-pulse">
         <AlertTriangle aria-hidden="true" className="h-3 w-3" />
-        {`${Math.abs(days)}d overdue`}
+        {`${days}d overdue`}
       </Badge>
     );
   }
+
+  const days = differenceInCalendarDays(due, startOfToday());
 
   return (
     <Badge color={days === 0 ? "amber" : "slate"}>

@@ -99,7 +99,7 @@ export function TaskFormModal({ open, onClose, task }: TaskFormModalProps) {
 
       if (task) {
         await updateTask.mutateAsync({ id: task.id, input });
-        toast.success("Ticket updated");
+        toast.success("Task updated");
       } else {
         const created = await createTask.mutateAsync(input);
         toast.success(`${formatTicketNumber(created.ticket_no)} created`);
@@ -108,7 +108,7 @@ export function TaskFormModal({ open, onClose, task }: TaskFormModalProps) {
       onClose();
     } catch (error) {
       toast.error(
-        error instanceof Error ? error.message : "Ticket was not saved.",
+        error instanceof Error ? error.message : "Task was not saved.",
       );
     }
   }
@@ -119,11 +119,11 @@ export function TaskFormModal({ open, onClose, task }: TaskFormModalProps) {
     <Modal
       open={open}
       onClose={onClose}
-      title={editing ? `Edit ${formatTicketNumber(task!.ticket_no)}` : "New ticket"}
+      title={editing ? `Edit task ${formatTicketNumber(task!.ticket_no)}` : "New task"}
       description={
         editing
-          ? "Update the work order and save your changes."
-          : "Give the work order a title, then set where it sits and when it is due."
+          ? "Update the task details."
+          : "Add the key details."
       }
       footer={
         <>
@@ -131,7 +131,7 @@ export function TaskFormModal({ open, onClose, task }: TaskFormModalProps) {
             Cancel
           </Button>
           <Button type="submit" form="task-form" variant="primary" disabled={busy}>
-            {busy ? "Saving..." : editing ? "Save changes" : "Create ticket"}
+            {busy ? "Saving..." : editing ? "Save changes" : "Create task"}
           </Button>
         </>
       }
@@ -144,7 +144,7 @@ export function TaskFormModal({ open, onClose, task }: TaskFormModalProps) {
       >
         <Input
           label="Title"
-          placeholder="Replace the belt on line 3"
+          placeholder="Design new landing page"
           error={errors.title?.message}
           {...register("title")}
         />
@@ -152,7 +152,7 @@ export function TaskFormModal({ open, onClose, task }: TaskFormModalProps) {
         <Textarea
           label="Description"
           rows={4}
-          placeholder="What needs doing, and anything the next person should know."
+          placeholder="Add a short note."
           error={errors.description?.message}
           {...register("description")}
         />

@@ -36,10 +36,9 @@ const config: Config = {
         mono: ["var(--font-mono)", "ui-monospace", "SFMono-Regular", "monospace"],
       },
       boxShadow: {
-        // Resting ticket: a hairline lift, barely there.
-        ticket: "0 1px 2px 0 rgb(var(--ink-rgb) / 0.04)",
-        // Ticket picked up mid-drag.
-        lift: "0 12px 24px -6px rgb(var(--ink-rgb) / 0.18), 0 4px 8px -4px rgb(var(--ink-rgb) / 0.10)",
+        ticket: "0 10px 30px -18px rgb(var(--ink-rgb) / 0.26), 0 1px 2px rgb(var(--ink-rgb) / 0.06)",
+        lift: "0 22px 44px -18px rgb(var(--progress-rgb) / 0.42), 0 10px 18px -12px rgb(var(--ink-rgb) / 0.20)",
+        panel: "0 18px 50px -32px rgb(var(--ink-rgb) / 0.35)",
       },
       transitionDuration: {
         DEFAULT: "150ms",

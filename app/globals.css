@@ -5,25 +5,25 @@
 @layer base {
   :root {
     /* Canonical design tokens. */
-    --paper: #faf9f5;
-    --ink: #1b2430;
-    --slate: #5c6470;
-    --amber: #e8a33d;
-    --line: #e4e9f2;
-    --done: #4f9d69;
-    --danger: #d1495b;
-    --progress: #3e6fa8;
+    --paper: #ffffff;
+    --ink: #14112b;
+    --slate: #74718a;
+    --amber: #f5a524;
+    --line: #e9e7f5;
+    --done: #21b573;
+    --danger: #ef476f;
+    --progress: #5b4bdb;
 
     /* Channel triplets mirroring the hex above, so Tailwind can apply opacity
        modifiers. Change a color here and in the block above, together. */
-    --paper-rgb: 250 249 245;
-    --ink-rgb: 27 36 48;
-    --slate-rgb: 92 100 112;
-    --amber-rgb: 232 163 61;
-    --line-rgb: 228 233 242;
-    --done-rgb: 79 157 105;
-    --danger-rgb: 209 73 91;
-    --progress-rgb: 62 111 168;
+    --paper-rgb: 255 255 255;
+    --ink-rgb: 20 17 43;
+    --slate-rgb: 116 113 138;
+    --amber-rgb: 245 165 36;
+    --line-rgb: 233 231 245;
+    --done-rgb: 33 181 115;
+    --danger-rgb: 239 71 111;
+    --progress-rgb: 91 75 219;
   }
 
   html {
@@ -31,7 +31,7 @@
   }
 
   body {
-    background-color: var(--paper);
+    background-color: #f7f6ff;
     color: var(--ink);
     font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
@@ -56,10 +56,11 @@
   /* Blueprint dot grid: --line at low opacity over --paper. Reads as texture at
      arm's length, resolves into a drafting grid up close. */
   .bg-blueprint {
-    background-color: var(--paper);
-    background-image: radial-gradient(rgb(var(--line-rgb) / 0.85) 1px, transparent 1px);
-    background-size: 24px 24px;
-    background-position: -1px -1px;
+    background:
+      linear-gradient(180deg, rgb(255 255 255 / 0.92) 0%, rgb(247 246 255 / 1) 42rem),
+      radial-gradient(circle at 18% 12%, rgb(var(--progress-rgb) / 0.08), transparent 18rem),
+      radial-gradient(circle at 84% 10%, rgb(var(--amber-rgb) / 0.10), transparent 16rem),
+      #f7f6ff;
   }
 
   /* The torn-stub perforation: a dashed hairline separating the ticket number

@@ -90,7 +90,7 @@ export function FilterBar({
             <Select
               label="Filter by status"
               srOnlyLabel
-              className="h-9"
+              className="h-10 rounded-xl bg-ink/[0.025] shadow-none"
               value={filters.status ?? ""}
               onChange={(event) =>
                 onFiltersChange({
@@ -110,7 +110,7 @@ export function FilterBar({
             <Select
               label="Filter by priority"
               srOnlyLabel
-              className="h-9"
+              className="h-10 rounded-xl bg-ink/[0.025] shadow-none"
               value={filters.priority ?? ""}
               onChange={(event) =>
                 onFiltersChange({
@@ -130,7 +130,7 @@ export function FilterBar({
             <Select
               label="Sort tasks"
               srOnlyLabel
-              className="h-9"
+              className="h-10 rounded-xl bg-ink/[0.025] shadow-none"
               value={sort}
               onChange={(event) => onSortChange(event.target.value as TaskSort)}
             >
@@ -145,13 +145,13 @@ export function FilterBar({
       </div>
 
       {activeFilters.length > 0 ? (
-        <div className="flex flex-wrap items-center gap-2 border-t border-line pt-3">
+        <div className="flex flex-wrap items-center gap-2 border-t border-line/80 pt-3">
           {activeFilters.map((filter) => (
             <button
               key={filter.key}
               type="button"
               onClick={filter.onRemove}
-              className="inline-flex items-center gap-1.5 rounded border border-line bg-paper px-2 py-1 font-mono text-[11px] font-medium text-slate transition-colors duration-150 hover:border-slate/40 hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber"
+              className="inline-flex items-center gap-1.5 rounded-full border border-line bg-paper px-3 py-1.5 font-mono text-[11px] font-semibold text-slate transition-colors duration-150 hover:bg-ink/[0.04] hover:text-ink focus-visible:outline-none"
             >
               {filter.label}
               <X aria-hidden="true" className="h-3 w-3" />
@@ -160,7 +160,7 @@ export function FilterBar({
           <button
             type="button"
             onClick={clearAll}
-            className="rounded px-2 py-1 font-body text-xs font-medium text-slate transition-colors duration-150 hover:bg-ink/[0.04] hover:text-ink focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber"
+            className="rounded-full px-3 py-1.5 font-body text-xs font-semibold text-slate transition-colors duration-150 hover:bg-ink/[0.04] hover:text-ink focus-visible:outline-none"
           >
             Clear all
           </button>
@@ -181,7 +181,7 @@ function ViewToggleGroup({
     <div
       role="group"
       aria-label="View"
-      className="inline-flex shrink-0 self-start rounded-md border border-line p-0.5 xl:self-auto"
+      className="inline-flex shrink-0 self-start rounded-xl border border-line bg-ink/[0.025] p-1 xl:self-auto"
     >
       <ViewToggle
         active={view === "board"}
@@ -216,10 +216,10 @@ function ViewToggle({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded px-2.5 py-1.5",
-        "font-body text-xs font-medium transition-colors duration-150 ease-out",
-        "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
-        active ? "bg-ink text-paper" : "text-slate hover:bg-ink/[0.04]",
+        "inline-flex items-center gap-1.5 rounded-lg px-3 py-2",
+        "font-body text-xs font-semibold transition-colors duration-150 ease-out",
+        "focus-visible:outline-none",
+        active ? "bg-progress text-paper shadow-ticket" : "text-slate hover:bg-paper hover:text-ink",
       )}
     >
       {icon}

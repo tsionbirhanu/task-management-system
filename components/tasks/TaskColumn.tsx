@@ -2,8 +2,9 @@
 
 import type { ReactNode } from "react";
 
-import { Plus } from "lucide-react";
+import { Circle, MoreHorizontal, Plus } from "lucide-react";
 import { useDroppable } from "@dnd-kit/core";
+import { toast } from "sonner";
 
 import { Button } from "@/components/ui/Button";
 import { EmptyState } from "@/components/ui/EmptyState";
@@ -15,13 +16,14 @@ export interface TaskColumnProps {
   count: number;
   isOver?: boolean;
   onNewTask?: () => void;
+  className?: string;
   children?: ReactNode;
 }
 
-const UNDERLINE: Record<TaskStatus, string> = {
-  todo: "border-b-slate/50",
-  in_progress: "border-b-amber",
-  done: "border-b-done",
+const DOT: Record<TaskStatus, string> = {
+  todo: "text-progress",
+  in_progress: "text-amber",
+  done: "text-done",
 };
 
 const OVER_STATE: Record<TaskStatus, string> = {
@@ -35,55 +37,80 @@ export function TaskColumn({
   count,
   isOver = false,
   onNewTask,
+  className,
   children,
 }: TaskColumnProps) {
   const meta = STATUS_META[status];
   const headingId = `column-heading-${status}`;
+  const panelId = `column-panel-${status}`;
   const { setNodeRef } = useDroppable({ id: status });
+  const countLabel = count === 1 ? "1 task" : `${count} tasks`;
 
   return (
     <section
       ref={setNodeRef}
+      id={panelId}
       aria-labelledby={headingId}
       className={cn(
-        "flex min-h-[24rem] flex-col rounded-lg border bg-paper/70 p-3",
+        "flex min-h-[28rem] flex-col rounded-[1.5rem] border border-line/80 bg-[#fafbff] p-4 shadow-panel backdrop-blur",
         "transition-colors duration-150 ease-out motion-reduce:transition-none",
-        isOver ? OVER_STATE[status] : "border-line",
+        isOver ? OVER_STATE[status] : "",
+        className,
       )}
     >
-      <header
-        className={cn(
-          "mb-3 flex items-center justify-between gap-2 border-b-2 pb-2",
-          UNDERLINE[status],
-        )}
-      >
-        <div className="flex items-baseline gap-2">
+      <header className="mb-4 flex items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          <Circle
+            aria-hidden="true"
+            className={cn("h-2.5 w-2.5 fill-current", DOT[status])}
+          />
           <h2
             id={headingId}
-            className="font-display text-sm font-semibold uppercase tracking-wide text-ink"
+            className="font-display text-base font-bold tracking-tight text-ink"
           >
             {meta.label}
           </h2>
-          <span
-            className="font-mono text-xs text-slate"
-            aria-label={`${count} tickets`}
-          >
-            {String(count).padStart(2, "0")}
+          <span className="ml-1 rounded-full bg-line/80 px-2 py-0.5 font-mono text-xs font-bold text-slate">
+            {count}
           </span>
         </div>
 
         {status === "todo" && onNewTask ? (
-          <Button variant="ghost" size="sm" onClick={onNewTask}>
+          <Button variant="ghost" size="sm" onClick={onNewTask} className="h-8 shrink-0 rounded-lg px-2">
             <Plus aria-hidden="true" className="h-3.5 w-3.5" />
-            New ticket
+            New task
           </Button>
-        ) : null}
+        ) : (
+          <button
+            type="button"
+            aria-label={`${meta.label} options`}
+            title={`${meta.label} options`}
+            onClick={() =>
+              toast.info(`${meta.label} has ${countLabel.toLowerCase()}.`)
+            }
+            className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-slate transition-colors duration-150 hover:bg-ink/[0.04] hover:text-ink focus-visible:outline-none"
+          >
+            <MoreHorizontal aria-hidden="true" className="h-4 w-4" />
+          </button>
+        )}
       </header>
 
-      {count === 0 ? (
-        <EmptyState title={meta.label} message={meta.emptyState} />
+      {count === 0 && status === "todo" ? (
+        <EmptyState
+          title={status === "todo" ? "Open the first task" : meta.label}
+          message={meta.emptyState}
+          action={
+            status === "todo" && onNewTask
+              ? { label: "New task", onClick: onNewTask }
+              : undefined
+          }
+        />
+      ) : count === 0 ? (
+        <p className="py-10 text-center font-body text-sm font-medium text-slate">
+          {meta.emptyState}
+        </p>
       ) : (
-        <ul className="flex flex-col gap-2">{children}</ul>
+        <ul className="flex flex-1 flex-col gap-3">{children}</ul>
       )}
     </section>
   );

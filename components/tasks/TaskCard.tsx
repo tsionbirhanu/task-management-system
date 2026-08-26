@@ -1,13 +1,16 @@
 "use client";
 
-import { Edit2, GripVertical, Trash2 } from "lucide-react";
-
-import { DueBadge } from "@/components/tasks/DueBadge";
-import { PriorityBadge } from "@/components/tasks/PriorityBadge";
-import { Select } from "@/components/ui/Select";
 import {
-  STATUS_META,
-  TASK_STATUSES,
+  CalendarDays,
+  CheckCircle2,
+  Edit2,
+  GripVertical,
+  Trash2,
+} from "lucide-react";
+import { format, isPast } from "date-fns";
+
+import { PriorityBadge } from "@/components/tasks/PriorityBadge";
+import {
   formatTicketNumber,
   type Task,
   type TaskPriority,
@@ -17,7 +20,6 @@ import { cn } from "@/lib/utils";
 
 export interface TaskCardProps {
   task: Task;
-  onStatusChange?: (status: TaskStatus) => void;
   onEdit?: () => void;
   onDelete?: () => void;
   isDragging?: boolean;
@@ -27,97 +29,118 @@ export interface TaskCardProps {
 const PRIORITY_ACCENT: Record<TaskPriority, string> = {
   high: "bg-danger",
   medium: "bg-amber",
-  low: "bg-slate/40",
+  low: "bg-done",
+};
+
+const STATUS_DOT: Record<TaskStatus, string> = {
+  todo: "bg-progress",
+  in_progress: "bg-amber",
+  done: "bg-done",
 };
 
 export function TaskCard({
   task,
-  onStatusChange,
   onEdit,
   onDelete,
   isDragging = false,
   className,
 }: TaskCardProps) {
   const ticket = formatTicketNumber(task.ticket_no);
+  const dueDate = task.due_date ? new Date(task.due_date) : null;
+  const dueLabel =
+    dueDate && !Number.isNaN(dueDate.getTime())
+      ? format(dueDate, "MMM d, yyyy")
+      : "No due date";
+  const isOverdue =
+    task.status !== "done" &&
+    dueDate !== null &&
+    !Number.isNaN(dueDate.getTime()) &&
+    isPast(dueDate);
 
   return (
     <article
       aria-label={`${ticket} ${task.title}`}
       className={cn(
-        "group relative overflow-hidden rounded-md border border-line bg-paper",
+        "group relative cursor-grab rounded-2xl border border-line/90 bg-paper p-4 active:cursor-grabbing",
         "shadow-ticket transition duration-150 ease-out motion-reduce:transition-none",
         isDragging
-          ? "scale-[1.02] border-amber shadow-lift motion-reduce:scale-100 motion-reduce:shadow-ticket"
-          : "hover:border-slate/30 hover:shadow-lift",
+          ? "scale-[1.02] opacity-95 shadow-lift motion-reduce:scale-100 motion-reduce:shadow-ticket"
+          : "hover:-translate-y-0.5 hover:shadow-lift motion-reduce:hover:translate-y-0",
+        isOverdue && "border-danger/20 bg-danger/[0.025]",
         className,
       )}
     >
-      <span
-        aria-hidden="true"
-        className={cn("absolute inset-y-0 left-0 w-1", PRIORITY_ACCENT[task.priority])}
-      />
-      <span
-        aria-hidden="true"
-        className="absolute left-9 top-[2.35rem] h-2.5 w-2.5 -translate-x-1/2 rounded-full border border-line bg-paper"
-      />
-      <span
-        aria-hidden="true"
-        className="absolute right-3 top-[2.35rem] h-2.5 w-2.5 translate-x-1/2 rounded-full border border-line bg-paper"
-      />
+      {isOverdue ? (
+        <span
+          aria-hidden="true"
+          className="absolute inset-y-4 left-0 w-1 rounded-r-full bg-danger"
+        />
+      ) : null}
 
-      <div className="pl-4">
-        <div className="perforation flex items-center justify-between gap-2 px-3 py-2">
-          <span className="font-mono text-[11px] font-medium uppercase tracking-wider text-slate">
-            {ticket}
-          </span>
-          <GripVertical
-            aria-hidden="true"
-            className="h-3.5 w-3.5 shrink-0 text-slate/40 opacity-0 transition-opacity duration-150 group-hover:opacity-100"
-          />
-        </div>
-
-        <div className="px-3 py-2.5">
-          <h3 className="line-clamp-2 font-body text-sm font-medium text-ink">
-            {task.title}
-          </h3>
-          {task.description ? (
-            <p className="mt-1 line-clamp-2 font-body text-xs leading-5 text-slate">
-              {task.description}
-            </p>
-          ) : null}
-        </div>
-
-        <div className="flex flex-wrap items-center gap-1.5 border-t border-line px-3 py-2.5">
-          <PriorityBadge priority={task.priority} />
-          <DueBadge dueDate={task.due_date} />
-
-          {onStatusChange ? (
-            <Select
-              label={`Move ${ticket} to another column`}
-              srOnlyLabel
-              value={task.status}
-              onChange={(event) =>
-                onStatusChange(event.target.value as TaskStatus)
-              }
-              className="h-7 min-w-28 border-line bg-paper pl-2 pr-7 font-body text-xs text-slate"
-            >
-              {TASK_STATUSES.map((status) => (
-                <option key={status} value={status}>
-                  {STATUS_META[status].label}
-                </option>
-              ))}
-            </Select>
-          ) : null}
-
-          <div className="ml-auto flex items-center gap-1">
-            <IconButton label={`Edit ${ticket}`} onClick={onEdit}>
-              <Edit2 aria-hidden="true" className="h-3.5 w-3.5" />
-            </IconButton>
-            <IconButton label={`Delete ${ticket}`} onClick={onDelete} danger>
-              <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
-            </IconButton>
+      <div className="flex items-start justify-between gap-3">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-start gap-2">
+            <span
+              aria-hidden="true"
+              className={cn("mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full", STATUS_DOT[task.status])}
+            />
+            <div className="min-w-0">
+              <div className="flex items-start gap-2">
+                <h3
+                  className={cn(
+                    "line-clamp-2 font-body text-[15px] font-bold leading-5 text-ink",
+                    task.status === "done" &&
+                      "text-slate line-through decoration-done decoration-2",
+                  )}
+                >
+                  {task.title}
+                </h3>
+                {task.status === "done" ? (
+                  <CheckCircle2
+                    aria-hidden="true"
+                    className="mt-0.5 h-4 w-4 shrink-0 fill-done text-paper"
+                  />
+                ) : null}
+              </div>
+            </div>
           </div>
         </div>
+
+        <div className="flex items-center gap-1 opacity-100 transition-opacity duration-150 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+          <span
+            title="Drag to move"
+            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate/55 transition-colors duration-150 group-hover:bg-ink/[0.035] group-hover:text-slate"
+          >
+            <span className="sr-only">Drag task to move</span>
+            <GripVertical aria-hidden="true" className="h-4 w-4" />
+          </span>
+          <IconButton label={`Edit task ${ticket}`} onClick={onEdit}>
+            <Edit2 aria-hidden="true" className="h-3.5 w-3.5" />
+          </IconButton>
+          <IconButton label={`Delete task ${ticket}`} onClick={onDelete} danger>
+            <Trash2 aria-hidden="true" className="h-3.5 w-3.5" />
+          </IconButton>
+        </div>
+      </div>
+
+      {task.description ? (
+        <p className="mt-3 line-clamp-3 font-body text-xs leading-5 text-slate">
+          {task.description}
+        </p>
+      ) : null}
+
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2">
+        <span className="inline-flex items-center gap-1.5 font-body text-xs font-semibold text-slate">
+          <CalendarDays aria-hidden="true" className="h-3.5 w-3.5 text-slate/70" />
+          {dueLabel}
+        </span>
+        <span className="inline-flex items-center gap-2">
+          <span
+            aria-hidden="true"
+            className={cn("h-1.5 w-1.5 rounded-full", PRIORITY_ACCENT[task.priority])}
+          />
+          <PriorityBadge priority={task.priority} />
+        </span>
       </div>
     </article>
   );
@@ -141,8 +164,8 @@ function IconButton({
       title={label}
       onClick={onClick}
       className={cn(
-        "inline-flex h-7 w-7 items-center justify-center rounded border border-transparent",
-        "transition-colors duration-150 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
+        "inline-flex h-7 w-7 items-center justify-center rounded-lg border border-transparent",
+        "transition-colors duration-150 ease-out focus-visible:outline-none",
         danger
           ? "text-danger hover:border-danger/30 hover:bg-danger/10"
           : "text-slate hover:border-line hover:bg-ink/[0.04] hover:text-ink",

@@ -45,11 +45,11 @@ export const Select = forwardRef<HTMLSelectElement, SelectProps>(function Select
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? messageId : undefined}
           className={cn(
-            "h-10 w-full appearance-none rounded-md border bg-paper",
+            "h-11 w-full appearance-none rounded-lg border bg-paper shadow-ticket",
             "pl-3 pr-9 font-body text-sm text-ink",
             "transition-colors duration-150 ease-out",
-            "focus-visible:border-amber focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
-            error ? "border-danger" : "border-line hover:border-slate/40",
+            "focus-visible:border-line focus-visible:outline-none",
+            error ? "border-danger" : "border-line hover:bg-paper",
             className,
           )}
           {...props}

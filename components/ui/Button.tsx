@@ -13,13 +13,13 @@ export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANTS: Record<ButtonVariant, string> = {
-  primary: "border-amber bg-amber text-ink hover:bg-amber/90",
+  primary: "border-progress bg-progress text-paper shadow-ticket hover:bg-progress/90",
   secondary:
-    "border-ink/30 bg-paper text-ink hover:border-ink hover:bg-ink/[0.02]",
+    "border-line bg-paper text-ink shadow-ticket hover:border-progress/30 hover:bg-progress/[0.03]",
   ghost:
     "border-transparent bg-transparent text-slate hover:bg-ink/[0.04] hover:text-ink",
-  destructive: "border-danger bg-danger text-paper hover:bg-danger/90",
-  danger: "border-danger bg-danger text-paper hover:bg-danger/90",
+  destructive: "border-danger bg-danger text-paper shadow-ticket hover:bg-danger/90",
+  danger: "border-danger bg-danger text-paper shadow-ticket hover:bg-danger/90",
 };
 
 const SIZES: Record<ButtonSize, string> = {

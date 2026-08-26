@@ -84,11 +84,11 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center p-4 sm:items-center"
+      className="fixed inset-0 z-50 flex items-end justify-center p-3 sm:items-center sm:p-4"
       role="presentation"
     >
       <div
-        className="absolute inset-0 bg-ink/40"
+        className="absolute inset-0 bg-ink/45 backdrop-blur-sm"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -100,16 +100,16 @@ export function Modal({
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
         className={cn(
-          "relative w-full max-w-lg rounded-lg border border-line bg-paper",
+          "relative w-full max-w-lg rounded-t-[1.5rem] border border-line bg-paper sm:rounded-[1.5rem]",
           "shadow-lift focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
           className,
         )}
       >
-        <header className="flex items-start justify-between gap-4 border-b border-line px-5 py-4">
+        <header className="flex items-start justify-between gap-4 border-b border-line px-5 py-5">
           <div className="flex flex-col gap-1">
             <h2
               id={headingId}
-            className="font-display text-base font-semibold text-ink"
+            className="font-display text-lg font-bold text-ink"
             >
               {title}
             </h2>
@@ -129,10 +129,10 @@ export function Modal({
           </button>
         </header>
 
-        {children ? <div className="px-5 py-4">{children}</div> : null}
+        {children ? <div className="px-5 py-5">{children}</div> : null}
 
         {footer ? (
-          <footer className="flex justify-end gap-2 border-t border-line px-5 py-4">
+          <footer className="flex flex-col-reverse gap-2 border-t border-line px-5 py-4 sm:flex-row sm:justify-end">
             {footer}
           </footer>
         ) : null}

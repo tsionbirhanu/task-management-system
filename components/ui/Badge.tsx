@@ -15,11 +15,11 @@ export interface BadgeProps {
 }
 
 const TONES: Record<BadgeTone, string> = {
-  neutral: "border-line bg-ink/[0.03] text-slate",
-  amber: "border-amber/30 bg-amber/10 text-ink",
-  done: "border-done/30 bg-done/10 text-done",
-  danger: "border-danger/30 bg-danger/10 text-danger",
-  progress: "border-progress/30 bg-progress/10 text-progress",
+  neutral: "border-line bg-ink/[0.035] text-slate",
+  amber: "border-amber/20 bg-amber/12 text-amber",
+  done: "border-done/20 bg-done/10 text-done",
+  danger: "border-danger/20 bg-danger/10 text-danger",
+  progress: "border-progress/20 bg-progress/10 text-progress",
 };
 
 const COLORS: Record<BadgeColor, string> = {
@@ -40,8 +40,8 @@ export function Badge({
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1 rounded border px-1.5 py-0.5",
-        "text-[11px] font-medium leading-none",
+        "inline-flex items-center gap-1 rounded-full border px-2 py-1",
+        "text-[11px] font-semibold leading-none",
         mono ? "font-mono" : "font-body",
         color ? COLORS[color] : TONES[tone],
         className,

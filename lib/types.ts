@@ -60,15 +60,15 @@ export const STATUS_META: Record<
 > = {
   todo: {
     label: "To Do",
-    emptyState: "No tickets in To Do yet — create one to get started.",
+    emptyState: "No tasks in To Do yet. Add the first one.",
   },
   in_progress: {
     label: "In Progress",
-    emptyState: "Nothing in progress. Move a ticket here when you start work.",
+    emptyState: "Nothing is in progress. Move a task here when work starts.",
   },
   done: {
     label: "Done",
-    emptyState: "No finished tickets yet. Completed work lands here.",
+    emptyState: "No finished tasks yet. Completed work lands here.",
   },
 };
 

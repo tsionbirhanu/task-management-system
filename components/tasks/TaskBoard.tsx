@@ -24,7 +24,13 @@ import { CSS } from "@dnd-kit/utilities";
 
 import { TaskCard } from "@/components/tasks/TaskCard";
 import { TaskColumn } from "@/components/tasks/TaskColumn";
-import { TASK_STATUSES, type Task, type TaskStatus } from "@/lib/types";
+import {
+  STATUS_META,
+  TASK_STATUSES,
+  type Task,
+  type TaskStatus,
+} from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 export interface TaskBoardProps {
   tasks?: Task[];
@@ -47,6 +53,7 @@ export function TaskBoard({
 }: TaskBoardProps) {
   const [activeId, setActiveId] = useState<UniqueIdentifier | null>(null);
   const [overStatus, setOverStatus] = useState<TaskStatus | null>(null);
+  const [mobileStatus, setMobileStatus] = useState<TaskStatus>("todo");
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -120,6 +127,32 @@ export function TaskBoard({
       onDragEnd={handleDragEnd}
       onDragCancel={handleDragCancel}
     >
+      <div
+        role="tablist"
+        aria-label="Board columns"
+        className="mb-3 grid grid-cols-3 gap-1 rounded-md border border-line bg-paper p-1 sm:hidden"
+      >
+        {TASK_STATUSES.map((status) => (
+          <button
+            key={status}
+            type="button"
+            role="tab"
+            aria-selected={mobileStatus === status}
+            aria-controls={`column-panel-${status}`}
+            onClick={() => setMobileStatus(status)}
+            className={cn(
+              "rounded px-2 py-2 font-body text-xs font-medium transition-colors duration-150",
+              "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
+              mobileStatus === status
+                ? "bg-ink text-paper"
+                : "text-slate hover:bg-ink/[0.04] hover:text-ink",
+            )}
+          >
+            {STATUS_META[status].label}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
         {TASK_STATUSES.map((status) => {
           const columnTasks = columns[status];
@@ -131,6 +164,7 @@ export function TaskBoard({
               count={columnTasks.length}
               isOver={overStatus === status}
               onNewTask={onNewTask}
+              className={cn(status !== mobileStatus && "hidden sm:flex")}
             >
               <SortableContext
                 items={columnTasks.map((task) => task.id)}
@@ -143,9 +177,6 @@ export function TaskBoard({
                     isActive={activeId === task.id}
                     onEdit={() => onEditTask?.(task)}
                     onDelete={() => onDeleteTask?.(task)}
-                    onStatusChange={(nextStatus) =>
-                      onStatusChange?.(task, nextStatus, undefined)
-                    }
                   />
                 ))}
               </SortableContext>
@@ -162,13 +193,11 @@ function SortableTask({
   isActive,
   onEdit,
   onDelete,
-  onStatusChange,
 }: {
   task: Task;
   isActive: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
-  onStatusChange?: (status: TaskStatus) => void;
 }) {
   const {
     attributes,
@@ -194,7 +223,6 @@ function SortableTask({
         task={task}
         onEdit={onEdit}
         onDelete={onDelete}
-        onStatusChange={onStatusChange}
         isDragging={isActive}
       />
     </li>
