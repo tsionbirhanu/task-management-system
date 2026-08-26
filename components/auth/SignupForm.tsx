@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { authClient } from "@/lib/auth/client";
 import { signUpSchema, type SignUpInput } from "@/lib/validation/auth";
 
@@ -88,17 +89,15 @@ export function SignupForm() {
         error={errors.email?.message}
         {...register("email")}
       />
-      <Input
+      <PasswordInput
         label="Password"
-        type="password"
         autoComplete="new-password"
         hint="Use at least 8 characters."
         error={errors.password?.message}
         {...register("password")}
       />
-      <Input
+      <PasswordInput
         label="Confirm password"
-        type="password"
         autoComplete="new-password"
         error={errors.confirmPassword?.message}
         {...register("confirmPassword")}

@@ -27,6 +27,7 @@ import { TaskColumn } from "@/components/tasks/TaskColumn";
 import {
   STATUS_META,
   TASK_STATUSES,
+  isTaskStatus,
   type Task,
   type TaskStatus,
 } from "@/lib/types";
@@ -130,7 +131,7 @@ export function TaskBoard({
       <div
         role="tablist"
         aria-label="Board columns"
-        className="mb-3 grid grid-cols-3 gap-1 rounded-md border border-line bg-paper p-1 sm:hidden"
+        className="mb-3 grid grid-cols-3 gap-1 rounded-xl border border-line bg-paper p-1 sm:hidden"
       >
         {TASK_STATUSES.map((status) => (
           <button
@@ -141,7 +142,7 @@ export function TaskBoard({
             aria-controls={`column-panel-${status}`}
             onClick={() => setMobileStatus(status)}
             className={cn(
-              "rounded px-2 py-2 font-body text-xs font-medium transition-colors duration-150",
+              "rounded-lg px-2 py-2 font-body text-xs font-bold transition-colors duration-150",
               "focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
               mobileStatus === status
                 ? "bg-ink text-paper"
@@ -153,7 +154,7 @@ export function TaskBoard({
         ))}
       </div>
 
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
         {TASK_STATUSES.map((status) => {
           const columnTasks = columns[status];
 
@@ -177,6 +178,7 @@ export function TaskBoard({
                     isActive={activeId === task.id}
                     onEdit={() => onEditTask?.(task)}
                     onDelete={() => onDeleteTask?.(task)}
+                    onStatusChange={(status) => onStatusChange?.(task, status)}
                   />
                 ))}
               </SortableContext>
@@ -193,11 +195,13 @@ function SortableTask({
   isActive,
   onEdit,
   onDelete,
+  onStatusChange,
 }: {
   task: Task;
   isActive: boolean;
   onEdit?: () => void;
   onDelete?: () => void;
+  onStatusChange?: (status: TaskStatus) => void;
 }) {
   const {
     attributes,
@@ -223,6 +227,7 @@ function SortableTask({
         task={task}
         onEdit={onEdit}
         onDelete={onDelete}
+        onStatusChange={onStatusChange}
         isDragging={isActive}
       />
     </li>
@@ -246,10 +251,6 @@ function resolveOverStatus(
   const id = String(overId);
   if (isTaskStatus(id)) return id;
   return taskById.get(id)?.status ?? null;
-}
-
-function isTaskStatus(value: string): value is TaskStatus {
-  return TASK_STATUSES.some((status) => status === value);
 }
 
 function positionForInsert(tasks: Task[], index: number): number {

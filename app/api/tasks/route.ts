@@ -6,6 +6,7 @@ import {
   jsonError,
   parseJson,
   serializeTask,
+  serverError,
   validationError,
 } from "@/lib/api/tasks";
 import { getCurrentUser } from "@/lib/auth/session";
@@ -61,7 +62,11 @@ export async function GET(request: Request) {
     });
   } catch (error) {
     if (error instanceof ZodError) return validationError(error);
-    return jsonError(500, "Something went wrong while loading tasks.");
+    return serverError(
+      "GET /api/tasks",
+      error,
+      "Something went wrong while loading tasks.",
+    );
   }
 }
 
@@ -99,6 +104,10 @@ export async function POST(request: Request) {
     return NextResponse.json({ task: serializeTask(created) }, { status: 201 });
   } catch (error) {
     if (error instanceof ZodError) return validationError(error);
-    return jsonError(500, "Something went wrong while creating the task.");
+    return serverError(
+      "POST /api/tasks",
+      error,
+      "Something went wrong while creating the task.",
+    );
   }
 }

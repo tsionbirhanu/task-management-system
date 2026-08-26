@@ -1,28 +1,27 @@
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { ZodError, z } from "zod";
+import { ZodError } from "zod";
 
 import {
   jsonError,
   parseJson,
   serializeTask,
+  serverError,
+  taskIdParamsSchema,
+  taskUpdateValues,
   validationError,
+  type TaskRouteContext,
 } from "@/lib/api/tasks";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
 import { updateTaskSchema } from "@/lib/validation/task";
 
 const { tasks } = schema;
-const paramsSchema = z.object({ id: z.string().uuid("Enter a valid task id.") });
 
-interface RouteContext {
-  params: { id: string };
-}
-
-export async function GET(_request: Request, context: RouteContext) {
+export async function GET(_request: Request, context: TaskRouteContext) {
   try {
     // Parse
-    const { id } = paramsSchema.parse(context.params);
+    const { id } = taskIdParamsSchema.parse(context.params);
 
     // Authorize
     const user = await getCurrentUser();
@@ -41,14 +40,18 @@ export async function GET(_request: Request, context: RouteContext) {
     return NextResponse.json({ task: serializeTask(task) });
   } catch (error) {
     if (error instanceof ZodError) return validationError(error);
-    return jsonError(500, "Something went wrong while loading the task.");
+    return serverError(
+      "GET /api/tasks/[id]",
+      error,
+      "Something went wrong while loading the task.",
+    );
   }
 }
 
-export async function PATCH(request: Request, context: RouteContext) {
+export async function PATCH(request: Request, context: TaskRouteContext) {
   try {
     // Parse
-    const { id } = paramsSchema.parse(context.params);
+    const { id } = taskIdParamsSchema.parse(context.params);
     const body = await parseJson(request);
     const input = updateTaskSchema.parse(body);
 
@@ -59,17 +62,7 @@ export async function PATCH(request: Request, context: RouteContext) {
     // Query
     const [updated] = await getDb()
       .update(tasks)
-      .set({
-        ...(input.title !== undefined ? { title: input.title } : {}),
-        ...(input.description !== undefined
-          ? { description: input.description ?? null }
-          : {}),
-        ...(input.status !== undefined ? { status: input.status } : {}),
-        ...(input.priority !== undefined ? { priority: input.priority } : {}),
-        ...(input.due_date !== undefined
-          ? { due_date: input.due_date ? new Date(input.due_date) : null }
-          : {}),
-      })
+      .set(taskUpdateValues(input))
       .where(and(eq(tasks.id, id), eq(tasks.user_id, user.id)))
       .returning();
 
@@ -79,14 +72,18 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ task: serializeTask(updated) });
   } catch (error) {
     if (error instanceof ZodError) return validationError(error);
-    return jsonError(500, "Something went wrong while updating the task.");
+    return serverError(
+      "PATCH /api/tasks/[id]",
+      error,
+      "Something went wrong while updating the task.",
+    );
   }
 }
 
-export async function DELETE(_request: Request, context: RouteContext) {
+export async function DELETE(_request: Request, context: TaskRouteContext) {
   try {
     // Parse
-    const { id } = paramsSchema.parse(context.params);
+    const { id } = taskIdParamsSchema.parse(context.params);
 
     // Authorize
     const user = await getCurrentUser();
@@ -104,6 +101,10 @@ export async function DELETE(_request: Request, context: RouteContext) {
     return new NextResponse(null, { status: 204 });
   } catch (error) {
     if (error instanceof ZodError) return validationError(error);
-    return jsonError(500, "Something went wrong while deleting the task.");
+    return serverError(
+      "DELETE /api/tasks/[id]",
+      error,
+      "Something went wrong while deleting the task.",
+    );
   }
 }

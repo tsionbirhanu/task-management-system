@@ -7,10 +7,14 @@ import {
   GripVertical,
   Trash2,
 } from "lucide-react";
-import { format, isPast } from "date-fns";
+import { format } from "date-fns";
 
 import { PriorityBadge } from "@/components/tasks/PriorityBadge";
+import { IconButton } from "@/components/ui/IconButton";
+import { isTaskOverdue, parseDueDate } from "@/lib/reminders";
 import {
+  STATUS_META,
+  TASK_STATUSES,
   formatTicketNumber,
   type Task,
   type TaskPriority,
@@ -22,6 +26,7 @@ export interface TaskCardProps {
   task: Task;
   onEdit?: () => void;
   onDelete?: () => void;
+  onStatusChange?: (status: TaskStatus) => void;
   isDragging?: boolean;
   className?: string;
 }
@@ -42,20 +47,14 @@ export function TaskCard({
   task,
   onEdit,
   onDelete,
+  onStatusChange,
   isDragging = false,
   className,
 }: TaskCardProps) {
   const ticket = formatTicketNumber(task.ticket_no);
-  const dueDate = task.due_date ? new Date(task.due_date) : null;
-  const dueLabel =
-    dueDate && !Number.isNaN(dueDate.getTime())
-      ? format(dueDate, "MMM d, yyyy")
-      : "No due date";
-  const isOverdue =
-    task.status !== "done" &&
-    dueDate !== null &&
-    !Number.isNaN(dueDate.getTime()) &&
-    isPast(dueDate);
+  const dueDate = parseDueDate(task.due_date);
+  const dueLabel = dueDate ? format(dueDate, "MMM d, yyyy") : "No due date";
+  const isOverdue = isTaskOverdue(task);
 
   return (
     <article
@@ -106,10 +105,10 @@ export function TaskCard({
           </div>
         </div>
 
-        <div className="flex items-center gap-1 opacity-100 transition-opacity duration-150 sm:opacity-0 sm:group-hover:opacity-100 sm:group-focus-within:opacity-100">
+        <div className="flex items-center gap-1">
           <span
             title="Drag to move"
-            className="inline-flex h-7 w-7 items-center justify-center rounded-lg text-slate/55 transition-colors duration-150 group-hover:bg-ink/[0.035] group-hover:text-slate"
+            className="hidden h-7 w-7 items-center justify-center rounded-lg text-slate/55 transition-colors duration-150 hover:bg-ink/[0.035] hover:text-slate sm:inline-flex"
           >
             <span className="sr-only">Drag task to move</span>
             <GripVertical aria-hidden="true" className="h-4 w-4" />
@@ -142,36 +141,25 @@ export function TaskCard({
           <PriorityBadge priority={task.priority} />
         </span>
       </div>
-    </article>
-  );
-}
 
-function IconButton({
-  label,
-  onClick,
-  danger = false,
-  children,
-}: {
-  label: string;
-  onClick?: () => void;
-  danger?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-      className={cn(
-        "inline-flex h-7 w-7 items-center justify-center rounded-lg border border-transparent",
-        "transition-colors duration-150 ease-out focus-visible:outline-none",
-        danger
-          ? "text-danger hover:border-danger/30 hover:bg-danger/10"
-          : "text-slate hover:border-line hover:bg-ink/[0.04] hover:text-ink",
-      )}
-    >
-      {children}
-    </button>
+      {onStatusChange ? (
+        <label className="mt-4 flex items-center justify-between gap-3 rounded-xl border border-line bg-ink/[0.02] px-3 py-2 sm:hidden">
+          <span className="font-body text-xs font-bold text-slate">Move to</span>
+          <select
+            value={task.status}
+            onPointerDown={(event) => event.stopPropagation()}
+            onChange={(event) => onStatusChange(event.target.value as TaskStatus)}
+            className="min-w-0 flex-1 appearance-none bg-transparent text-right font-body text-xs font-bold text-ink outline-none"
+            aria-label={`Move ${task.title} to another status`}
+          >
+            {TASK_STATUSES.map((status) => (
+              <option key={status} value={status}>
+                {STATUS_META[status].label}
+              </option>
+            ))}
+          </select>
+        </label>
+      ) : null}
+    </article>
   );
 }

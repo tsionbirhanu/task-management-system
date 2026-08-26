@@ -4,19 +4,15 @@ import { ArrowDownUp, Edit2, Trash2 } from "lucide-react";
 
 import { DueBadge } from "@/components/tasks/DueBadge";
 import { PriorityBadge } from "@/components/tasks/PriorityBadge";
+import { IconButton } from "@/components/ui/IconButton";
 import { EmptyState } from "@/components/ui/EmptyState";
-import {
-  STATUS_META,
-  formatTicketNumber,
-  type Task,
-  type TaskFilters,
-} from "@/lib/types";
+import { STATUS_META, type Task, type TaskSort } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 export interface TaskListViewProps {
   tasks?: Task[];
-  sort: NonNullable<TaskFilters["sort"]>;
-  onSortChange: (sort: NonNullable<TaskFilters["sort"]>) => void;
+  sort: TaskSort;
+  onSortChange: (sort: TaskSort) => void;
   onEditTask?: (task: Task) => void;
   onDeleteTask?: (task: Task) => void;
 }
@@ -47,22 +43,19 @@ export function TaskListView({
           >
             <div className="flex items-start justify-between gap-3">
               <div className="min-w-0">
-                <p className="font-mono text-[11px] font-semibold uppercase tracking-wide text-slate">
-                  {formatTicketNumber(task.ticket_no)}
-                </p>
-                <h3 className="mt-1 line-clamp-2 font-body text-sm font-semibold leading-5 text-ink">
+                <h3 className="line-clamp-2 font-body text-sm font-semibold leading-5 text-ink">
                   {task.title}
                 </h3>
               </div>
               <div className="flex shrink-0 gap-1">
                 <IconButton
-                  label={`Edit task ${formatTicketNumber(task.ticket_no)}`}
+                  label={`Edit task ${task.title}`}
                   onClick={() => onEditTask?.(task)}
                 >
                   <Edit2 aria-hidden="true" className="h-3.5 w-3.5" />
                 </IconButton>
                 <IconButton
-                  label={`Delete task ${formatTicketNumber(task.ticket_no)}`}
+                  label={`Delete task ${task.title}`}
                   onClick={() => onDeleteTask?.(task)}
                   danger
                 >
@@ -89,11 +82,10 @@ export function TaskListView({
       </ul>
 
       <div className="hidden overflow-x-auto rounded-[1.15rem] border border-line bg-paper/85 shadow-ticket sm:block">
-        <table className="w-full min-w-[52rem] border-collapse text-left">
+        <table className="w-full min-w-[44rem] border-collapse text-left">
           <caption className="sr-only">All tasks</caption>
           <thead>
             <tr className="border-b border-line">
-              <Th className="w-28">Task ID</Th>
               <Th sortKey="created_at" activeSort={sort} onSortChange={onSortChange}>
                 Title
               </Th>
@@ -121,11 +113,8 @@ export function TaskListView({
             {tasks.map((task) => (
               <tr
                 key={task.id}
-              className="border-b border-line/70 last:border-b-0 hover:bg-progress/[0.025]"
+                className="border-b border-line/70 last:border-b-0 hover:bg-progress/[0.025]"
               >
-                <td className="px-3 py-2.5 font-mono text-xs text-slate">
-                  {formatTicketNumber(task.ticket_no)}
-                </td>
                 <td className="px-3 py-2.5">
                   <p className="font-body text-sm font-medium text-ink">{task.title}</p>
                   {task.description ? (
@@ -146,13 +135,13 @@ export function TaskListView({
                 <td className="px-3 py-2.5">
                   <div className="flex justify-end gap-1">
                     <IconButton
-                      label={`Edit task ${formatTicketNumber(task.ticket_no)}`}
+                      label={`Edit task ${task.title}`}
                       onClick={() => onEditTask?.(task)}
                     >
                       <Edit2 aria-hidden="true" className="h-3.5 w-3.5" />
                     </IconButton>
                     <IconButton
-                      label={`Delete task ${formatTicketNumber(task.ticket_no)}`}
+                      label={`Delete task ${task.title}`}
                       onClick={() => onDeleteTask?.(task)}
                       danger
                     >
@@ -178,9 +167,9 @@ function Th({
 }: {
   children: React.ReactNode;
   className?: string;
-  sortKey?: NonNullable<TaskFilters["sort"]>;
-  activeSort?: NonNullable<TaskFilters["sort"]>;
-  onSortChange?: (sort: NonNullable<TaskFilters["sort"]>) => void;
+  sortKey?: TaskSort;
+  activeSort?: TaskSort;
+  onSortChange?: (sort: TaskSort) => void;
 }) {
   const sortable = Boolean(sortKey && onSortChange);
   return (
@@ -208,35 +197,5 @@ function Th({
         children
       )}
     </th>
-  );
-}
-
-function IconButton({
-  label,
-  onClick,
-  danger = false,
-  children,
-}: {
-  label: string;
-  onClick?: () => void;
-  danger?: boolean;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      aria-label={label}
-      title={label}
-      onClick={onClick}
-      className={cn(
-        "inline-flex h-7 w-7 items-center justify-center rounded border border-transparent",
-        "transition-colors duration-150 ease-out focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
-        danger
-          ? "text-danger hover:border-danger/30 hover:bg-danger/10"
-          : "text-slate hover:border-line hover:bg-ink/[0.04] hover:text-ink",
-      )}
-    >
-      {children}
-    </button>
   );
 }

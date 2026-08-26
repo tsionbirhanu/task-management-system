@@ -2,8 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 
-import { ChevronDown, LogOut, Settings, UserRound, UsersRound } from "lucide-react";
-import { toast } from "sonner";
+import { ChevronDown, LogOut, UserRound } from "lucide-react";
 
 import { cn } from "@/lib/utils";
 
@@ -82,30 +81,12 @@ export function UserMenu({ email }: UserMenuProps) {
               </p>
             </div>
           </div>
-          <MenuButton
-            icon={<UserRound aria-hidden="true" className="h-3.5 w-3.5" />}
-            onClick={() => toast.info("Profile settings are not built yet.")}
-          >
-            My Profile
-          </MenuButton>
-          <MenuButton
-            icon={<Settings aria-hidden="true" className="h-3.5 w-3.5" />}
-            onClick={() => toast.info("Account settings are not built yet.")}
-          >
-            Account Settings
-          </MenuButton>
-          <MenuButton
-            icon={<UsersRound aria-hidden="true" className="h-3.5 w-3.5" />}
-            onClick={() => toast.info("Team members are not built yet.")}
-          >
-            Team Members
-          </MenuButton>
           {/* A real form post, so signing out works without JavaScript. */}
           <form method="post" action="/api/auth/signout">
             <button
               type="submit"
               role="menuitem"
-              className="flex w-full items-center gap-2 border-t border-line px-4 py-3 text-left font-body text-sm font-semibold text-ink transition-colors duration-150 ease-out hover:bg-ink/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber"
+              className="flex w-full items-center gap-2 px-4 py-3 text-left font-body text-sm font-semibold text-ink transition-colors duration-150 ease-out hover:bg-ink/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber"
             >
               <LogOut aria-hidden="true" className="h-3.5 w-3.5 text-slate" />
               Sign out
@@ -114,28 +95,6 @@ export function UserMenu({ email }: UserMenuProps) {
         </div>
       ) : null}
     </div>
-  );
-}
-
-function MenuButton({
-  icon,
-  onClick,
-  children,
-}: {
-  icon: React.ReactNode;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      type="button"
-      role="menuitem"
-      onClick={onClick}
-      className="flex w-full items-center gap-2 px-4 py-2.5 text-left font-body text-sm font-semibold text-ink transition-colors duration-150 ease-out hover:bg-ink/[0.04] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber"
-    >
-      <span className="text-slate">{icon}</span>
-      {children}
-    </button>
   );
 }
 

@@ -7,6 +7,7 @@ import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { authClient } from "@/lib/auth/client";
 import { signInSchema, type SignInInput } from "@/lib/validation/auth";
 
@@ -75,9 +76,8 @@ export function LoginForm() {
         error={errors.email?.message}
         {...register("email")}
       />
-      <Input
+      <PasswordInput
         label="Password"
-        type="password"
         autoComplete="current-password"
         error={errors.password?.message}
         {...register("password")}

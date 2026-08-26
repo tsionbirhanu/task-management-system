@@ -13,6 +13,7 @@
     --done: #21b573;
     --danger: #ef476f;
     --progress: #5b4bdb;
+    --app-bg: #f7f6ff;
 
     /* Channel triplets mirroring the hex above, so Tailwind can apply opacity
        modifiers. Change a color here and in the block above, together. */
@@ -24,6 +25,30 @@
     --done-rgb: 33 181 115;
     --danger-rgb: 239 71 111;
     --progress-rgb: 91 75 219;
+    --app-bg-rgb: 247 246 255;
+  }
+
+  .dark {
+    color-scheme: dark;
+    --paper: #151827;
+    --ink: #f7f4ff;
+    --slate: #a9a4bd;
+    --amber: #f8b84e;
+    --line: #2b3046;
+    --done: #47d895;
+    --danger: #ff6b8f;
+    --progress: #8b7bff;
+    --app-bg: #0d101c;
+
+    --paper-rgb: 21 24 39;
+    --ink-rgb: 247 244 255;
+    --slate-rgb: 169 164 189;
+    --amber-rgb: 248 184 78;
+    --line-rgb: 43 48 70;
+    --done-rgb: 71 216 149;
+    --danger-rgb: 255 107 143;
+    --progress-rgb: 139 123 255;
+    --app-bg-rgb: 13 16 28;
   }
 
   html {
@@ -31,8 +56,8 @@
   }
 
   body {
-    background-color: #f7f6ff;
-    color: var(--ink);
+    background-color: rgb(var(--app-bg-rgb));
+    color: rgb(var(--ink-rgb));
     font-family: var(--font-body), ui-sans-serif, system-ui, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
@@ -57,10 +82,28 @@
      arm's length, resolves into a drafting grid up close. */
   .bg-blueprint {
     background:
-      linear-gradient(180deg, rgb(255 255 255 / 0.92) 0%, rgb(247 246 255 / 1) 42rem),
+      linear-gradient(180deg, rgb(var(--paper-rgb) / 0.92) 0%, rgb(var(--app-bg-rgb) / 1) 42rem),
       radial-gradient(circle at 18% 12%, rgb(var(--progress-rgb) / 0.08), transparent 18rem),
       radial-gradient(circle at 84% 10%, rgb(var(--amber-rgb) / 0.10), transparent 16rem),
-      #f7f6ff;
+      rgb(var(--app-bg-rgb));
+  }
+
+  .dark .bg-blueprint {
+    background: linear-gradient(
+        180deg,
+        rgb(var(--paper-rgb) / 0.72) 0%,
+        rgb(var(--app-bg-rgb) / 1) 36rem
+      ),
+      rgb(var(--app-bg-rgb));
+  }
+
+  .dark [class*="shadow-"] {
+    box-shadow: none !important;
+  }
+
+  .dark [class*="backdrop-blur"] {
+    -webkit-backdrop-filter: none !important;
+    backdrop-filter: none !important;
   }
 
   /* The torn-stub perforation: a dashed hairline separating the ticket number

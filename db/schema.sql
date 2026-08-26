@@ -46,7 +46,7 @@ end
 $$;
 
 -- ---------------------------------------------------------------------------
--- 3. Table
+-- 3. Tables
 -- ---------------------------------------------------------------------------
 create table if not exists public.tasks (
   id          uuid primary key default gen_random_uuid(),
@@ -64,6 +64,13 @@ create table if not exists public.tasks (
   status      public.task_status   not null default 'todo',
   priority    public.task_priority not null default 'medium',
   due_date    timestamptz,
+
+  -- The due_date we last emailed a reminder about, null if we never have.
+  -- Comparing it against due_date is the whole dedupe mechanism: a second run
+  -- on the same day finds nothing left to send, and moving a deadline re-arms
+  -- the reminder on its own with no extra bookkeeping.
+  reminder_sent_for timestamptz,
+
   position    integer not null default 0,
   created_at  timestamptz not null default now(),
   updated_at  timestamptz not null default now()
@@ -73,6 +80,32 @@ comment on column public.tasks.ticket_no is
   'Per-user work order number. Displayed as #TM-0001.';
 comment on column public.tasks.position is
   'Sort order within a status column. Lower sorts first.';
+comment on column public.tasks.reminder_sent_for is
+  'due_date value a reminder email was last sent for. Makes the job idempotent.';
+
+-- Databases created before reminders shipped get the column here.
+alter table public.tasks
+  add column if not exists reminder_sent_for timestamptz;
+
+-- Where to email each user.
+--
+-- Neon Auth keeps its user records in its own service. Unlike legacy Neon Auth
+-- (Stack Auth) there is no neon_auth.users_sync table in this database, and the
+-- current SDK exposes no service-key lookup -- so a background job has no way
+-- to turn a user_id into an address. The app does know the address on every
+-- authenticated request, so it records it here and the reminder job joins
+-- against this table instead of against the auth provider.
+--
+-- Deliberately not a foreign key into the auth schema, for the same reason
+-- tasks.user_id is not one: see the note at the bottom of this file.
+create table if not exists public.task_owners (
+  user_id    text primary key,
+  email      text not null,
+  updated_at timestamptz not null default now()
+);
+
+comment on table public.task_owners is
+  'user_id -> email, recorded from live sessions so background jobs can send mail.';
 
 -- ---------------------------------------------------------------------------
 -- 4. Indexes
@@ -91,6 +124,13 @@ create index if not exists tasks_title_trgm_idx
 -- lock, the second fails loudly instead of duplicating a number.
 create unique index if not exists tasks_user_id_ticket_no_key
   on public.tasks (user_id, ticket_no);
+
+-- The reminder job scans "open, due in the next 24h" across every user, which
+-- is the one query in the app with no user_id in front of it. Partial, so the
+-- index only carries rows that could ever be reminded about.
+create index if not exists tasks_due_reminder_idx
+  on public.tasks (due_date)
+  where status <> 'done' and due_date is not null;
 
 -- ---------------------------------------------------------------------------
 -- 5. Triggers

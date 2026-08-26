@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import { useDeleteTask } from "@/hooks/useTasks";
 import { Button } from "@/components/ui/Button";
 import { Modal } from "@/components/ui/Modal";
-import { formatTicketNumber, type Task } from "@/lib/types";
+import type { Task } from "@/lib/types";
 
 export interface DeleteConfirmDialogProps {
   open: boolean;
@@ -19,7 +19,6 @@ export function DeleteConfirmDialog({
   task,
 }: DeleteConfirmDialogProps) {
   const deleteTask = useDeleteTask();
-  const ticket = task ? formatTicketNumber(task.ticket_no) : "this task";
 
   async function onConfirm() {
     if (!task) return;
@@ -38,7 +37,7 @@ export function DeleteConfirmDialog({
     <Modal
       open={open}
       onClose={onClose}
-      title={`Delete task ${ticket}?`}
+      title="Delete task?"
       description="This can't be undone."
       footer={
         <>
@@ -56,10 +55,7 @@ export function DeleteConfirmDialog({
       }
     >
       {task ? (
-        <p className="font-body text-sm text-slate">
-          <span className="font-mono text-xs text-ink">{ticket}</span>
-          <span> - {task.title}</span>
-        </p>
+        <p className="font-body text-sm text-slate">{task.title}</p>
       ) : null}
     </Modal>
   );

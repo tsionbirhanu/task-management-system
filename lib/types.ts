@@ -10,6 +10,12 @@ export type TaskStatus = (typeof TASK_STATUSES)[number];
 export const TASK_PRIORITIES = ["low", "medium", "high"] as const;
 export type TaskPriority = (typeof TASK_PRIORITIES)[number];
 
+export const TASK_SORTS = ["created_at", "due_date", "priority"] as const;
+export type TaskSort = (typeof TASK_SORTS)[number];
+
+export const BOARD_VIEWS = ["board", "list"] as const;
+export type BoardView = (typeof BOARD_VIEWS)[number];
+
 /** A row of public.tasks. `ticket_no` is the integer behind the #TM-0042 stub. */
 export interface Task {
   id: string;
@@ -28,30 +34,15 @@ export interface Task {
 }
 
 /**
- * What an insert may send. Everything omitted here has a database default:
- * `id` and `created_at`/`updated_at` generate themselves, `user_id` defaults to
- * auth.uid(), and `ticket_no` is assigned by the assign_ticket_no() trigger.
+ * What the board asks the API for. Every field is optional: an empty object is
+ * "all of my tickets, newest first".
  */
-export type TaskInsert = Pick<Task, "title"> &
-  Partial<
-    Pick<Task, "description" | "status" | "priority" | "due_date" | "position">
-  > & { user_id?: string };
-
-/** What an update may change. `updated_at` is maintained by a trigger. */
-export type TaskUpdate = Partial<
-  Pick<
-    Task,
-    "title" | "description" | "status" | "priority" | "due_date" | "position"
-  >
->;
-
 export interface TaskFilters {
   status?: TaskStatus;
   priority?: TaskPriority;
   /** Free-text search across titles, backed by the pg_trgm index. */
   search?: string;
-  q?: string;
-  sort?: "due_date" | "created_at" | "priority";
+  sort?: TaskSort;
 }
 
 export const STATUS_META: Record<
@@ -89,4 +80,21 @@ export interface ApiError {
     message: string;
     field?: string;
   };
+}
+
+/** Narrowing helpers for values arriving as untyped strings (URL params). */
+export function isTaskStatus(value: string | null): value is TaskStatus {
+  return TASK_STATUSES.some((status) => status === value);
+}
+
+export function isTaskPriority(value: string | null): value is TaskPriority {
+  return TASK_PRIORITIES.some((priority) => priority === value);
+}
+
+export function isTaskSort(value: string | null): value is TaskSort {
+  return TASK_SORTS.some((sort) => sort === value);
+}
+
+export function isBoardView(value: string | null): value is BoardView {
+  return BOARD_VIEWS.some((view) => view === value);
 }

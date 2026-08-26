@@ -63,23 +63,19 @@ export const updateTaskStatusSchema = z.object({
   position: z.number().int().finite().optional(),
 });
 
-/** Query string for GET /api/tasks. */
-export const listTasksQuerySchema = z
-  .object({
-    search: z.string().trim().max(120).optional(),
-    q: z.string().trim().max(120).optional(),
-    status: taskStatusSchema.optional(),
-    priority: taskPrioritySchema.optional(),
-    sort: taskSortSchema.default("created_at"),
-  })
-  .transform(({ q, search, ...query }) => ({
-    ...query,
-    search: search || q || undefined,
-  }));
-
-export const taskQuerySchema = listTasksQuerySchema;
+/** Query string for GET /api/tasks. An empty search reads as "no search". */
+export const listTasksQuerySchema = z.object({
+  search: z
+    .string()
+    .trim()
+    .max(120)
+    .optional()
+    .transform((value) => value || undefined),
+  status: taskStatusSchema.optional(),
+  priority: taskPrioritySchema.optional(),
+  sort: taskSortSchema.default("created_at"),
+});
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;
 export type UpdateTaskInput = z.infer<typeof updateTaskSchema>;
 export type UpdateTaskStatusInput = z.infer<typeof updateTaskStatusSchema>;
-export type TaskQuery = z.infer<typeof listTasksQuerySchema>;

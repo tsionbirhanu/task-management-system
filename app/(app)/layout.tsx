@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 
 import { TopBar } from "@/components/layout/TopBar";
 import { getCurrentUser, isAuthConfigured } from "@/lib/auth/session";
+import { rememberOwner } from "@/lib/db/owners";
 
 /** Reads the session cookie, so it can never be prerendered as static HTML. */
 export const dynamic = "force-dynamic";
@@ -19,6 +20,11 @@ export default async function AppLayout({
     if (!user) redirect("/login");
     if (!user.emailVerified) redirect("/confirm-email");
     email = user.email;
+
+    // Past the verification guard, so the address is deliverable. This is the
+    // only point where the app holds a user_id and an email together, and the
+    // reminder job has no other way to learn it -- see lib/db/owners.ts.
+    await rememberOwner(user);
   }
 
   return (

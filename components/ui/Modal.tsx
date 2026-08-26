@@ -100,7 +100,7 @@ export function Modal({
         aria-describedby={description ? descriptionId : undefined}
         tabIndex={-1}
         className={cn(
-          "relative w-full max-w-lg rounded-t-[1.5rem] border border-line bg-paper sm:rounded-[1.5rem]",
+          "relative flex max-h-[calc(100dvh-1.5rem)] w-full max-w-lg flex-col rounded-t-[1.5rem] border border-line bg-paper sm:max-h-[calc(100dvh-2rem)] sm:rounded-[1.5rem]",
           "shadow-lift focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-amber",
           className,
         )}
@@ -129,7 +129,7 @@ export function Modal({
           </button>
         </header>
 
-        {children ? <div className="px-5 py-5">{children}</div> : null}
+        {children ? <div className="min-h-0 overflow-y-auto px-5 py-5">{children}</div> : null}
 
         {footer ? (
           <footer className="flex flex-col-reverse gap-2 border-t border-line px-5 py-4 sm:flex-row sm:justify-end">

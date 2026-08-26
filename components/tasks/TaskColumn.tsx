@@ -52,7 +52,7 @@ export function TaskColumn({
       id={panelId}
       aria-labelledby={headingId}
       className={cn(
-        "flex min-h-[28rem] flex-col rounded-[1.5rem] border border-line/80 bg-[#fafbff] p-4 shadow-panel backdrop-blur",
+        "flex min-h-[22rem] flex-col rounded-[1.25rem] border border-line/80 bg-paper/78 p-3 shadow-panel backdrop-blur sm:min-h-[28rem] sm:rounded-[1.5rem] sm:p-4",
         "transition-colors duration-150 ease-out motion-reduce:transition-none",
         isOver ? OVER_STATE[status] : "",
         className,
@@ -95,22 +95,20 @@ export function TaskColumn({
         )}
       </header>
 
-      {count === 0 && status === "todo" ? (
+      {count > 0 ? (
+        <ul className="flex flex-1 flex-col gap-3">{children}</ul>
+      ) : status === "todo" ? (
+        // Only To Do gets the full call to action -- an empty In Progress or
+        // Done column is a normal state, not something to prompt about.
         <EmptyState
-          title={status === "todo" ? "Open the first task" : meta.label}
+          title="Open the first task"
           message={meta.emptyState}
-          action={
-            status === "todo" && onNewTask
-              ? { label: "New task", onClick: onNewTask }
-              : undefined
-          }
+          action={onNewTask ? { label: "New task", onClick: onNewTask } : undefined}
         />
-      ) : count === 0 ? (
+      ) : (
         <p className="py-10 text-center font-body text-sm font-medium text-slate">
           {meta.emptyState}
         </p>
-      ) : (
-        <ul className="flex flex-1 flex-col gap-3">{children}</ul>
       )}
     </section>
   );

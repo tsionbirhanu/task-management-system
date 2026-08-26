@@ -1,28 +1,26 @@
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { ZodError, z } from "zod";
+import { ZodError } from "zod";
 
 import {
   jsonError,
   parseJson,
   serializeTask,
+  serverError,
+  taskIdParamsSchema,
   validationError,
+  type TaskRouteContext,
 } from "@/lib/api/tasks";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getDb, schema } from "@/lib/db";
 import { updateTaskStatusSchema } from "@/lib/validation/task";
 
 const { tasks } = schema;
-const paramsSchema = z.object({ id: z.string().uuid("Enter a valid task id.") });
 
-interface RouteContext {
-  params: { id: string };
-}
-
-export async function PATCH(request: Request, context: RouteContext) {
+export async function PATCH(request: Request, context: TaskRouteContext) {
   try {
     // Parse
-    const { id } = paramsSchema.parse(context.params);
+    const { id } = taskIdParamsSchema.parse(context.params);
     const body = await parseJson(request);
     const input = updateTaskStatusSchema.parse(body);
 
@@ -46,6 +44,10 @@ export async function PATCH(request: Request, context: RouteContext) {
     return NextResponse.json({ task: serializeTask(updated) });
   } catch (error) {
     if (error instanceof ZodError) return validationError(error);
-    return jsonError(500, "Something went wrong while moving the task.");
+    return serverError(
+      "PATCH /api/tasks/[id]/status",
+      error,
+      "Something went wrong while moving the task.",
+    );
   }
 }

@@ -9,12 +9,17 @@ import {
   STATUS_META,
   TASK_PRIORITIES,
   TASK_STATUSES,
+  type BoardView,
   type TaskFilters,
+  type TaskSort,
 } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
-export type BoardView = "board" | "list";
-export type TaskSort = "created_at" | "due_date" | "priority";
+interface ActiveFilter {
+  key: string;
+  label: string;
+  onRemove: () => void;
+}
 
 export interface FilterBarProps {
   filters: TaskFilters;
@@ -33,14 +38,13 @@ export function FilterBar({
   view,
   onViewChange,
 }: FilterBarProps) {
-  const search = filters.search ?? filters.q ?? "";
+  const search = filters.search ?? "";
   const activeFilters = [
     search
       ? {
           key: "search",
           label: `"${search}"`,
-          onRemove: () =>
-            onFiltersChange({ ...filters, search: undefined, q: undefined }),
+          onRemove: () => onFiltersChange({ ...filters, search: undefined }),
         }
       : null,
     filters.status
@@ -57,15 +61,12 @@ export function FilterBar({
           onRemove: () => onFiltersChange({ ...filters, priority: undefined }),
         }
       : null,
-  ].filter((item): item is { key: string; label: string; onRemove: () => void } =>
-    Boolean(item),
-  );
+  ].filter((item): item is ActiveFilter => item !== null);
 
   function clearAll() {
     onFiltersChange({
       ...filters,
       search: undefined,
-      q: undefined,
       status: undefined,
       priority: undefined,
     });
@@ -79,11 +80,7 @@ export function FilterBar({
             className="min-w-0 flex-1"
             value={search}
             onChange={(nextSearch) =>
-              onFiltersChange({
-                ...filters,
-                search: nextSearch || undefined,
-                q: undefined,
-              })
+              onFiltersChange({ ...filters, search: nextSearch || undefined })
             }
           />
           <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 lg:w-[34rem]">
@@ -181,7 +178,7 @@ function ViewToggleGroup({
     <div
       role="group"
       aria-label="View"
-      className="inline-flex shrink-0 self-start rounded-xl border border-line bg-ink/[0.025] p-1 xl:self-auto"
+      className="inline-flex w-full shrink-0 rounded-xl border border-line bg-ink/[0.025] p-1 sm:w-auto xl:self-auto"
     >
       <ViewToggle
         active={view === "board"}
@@ -216,7 +213,7 @@ function ViewToggle({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "inline-flex items-center gap-1.5 rounded-lg px-3 py-2",
+        "inline-flex flex-1 items-center justify-center gap-1.5 rounded-lg px-3 py-2 sm:flex-none",
         "font-body text-xs font-semibold transition-colors duration-150 ease-out",
         "focus-visible:outline-none",
         active ? "bg-progress text-paper shadow-ticket" : "text-slate hover:bg-paper hover:text-ink",
