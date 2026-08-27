@@ -1,16 +1,44 @@
 # Workbench Task Manager
 
-Workbench is a quiet ticket board for personal work orders. Tickets can be
-created, edited, dragged between columns, filtered, searched, sorted, and read
-in either board or list view. Every ticket gets a per-user work order number —
-your first is `#TM-0001`, and so is everyone else's.
+A modern task management system for creating, organizing, and tracking personal work.
 
-Built with Next.js 16 (App Router), TypeScript, Tailwind, Drizzle, React Query,
-and Neon Postgres + Neon Auth.
+Built with Next.js 16 App Router, TypeScript, Tailwind CSS, Drizzle, React Query,
+Neon Postgres, and Neon Auth.
 
-## Setup
+## Features
 
-**1. Install.**
+* Authentication: signup, login, email confirmation, forgot password, reset password, and protected routes.
+* Task CRUD: create, view, edit, delete, and manage tasks.
+* Task attributes: title, description, status, priority, due date, and per-user task number.
+* Search and filters: search by title and filter by status or priority.
+* Sorting: sort tasks by newest, due date, or priority.
+* Board and list views: switch between Kanban and list layouts.
+* Drag and drop: move tasks between status columns with optimistic updates.
+* In-app reminders: overdue and due-soon alerts in the notification bell.
+* Email reminders: optional scheduled reminder emails through Resend and Vercel Cron.
+* Responsive UI: mobile cards, mobile board tabs, tablet layouts, and desktop board/table views.
+* URL state: search, filters, sorting, and view mode persist in the URL.
+
+## Tech Stack
+
+| Category       | Technology           |
+| -------------- | -------------------- |
+| Framework      | Next.js 16 App Router |
+| Language       | TypeScript           |
+| Styling        | Tailwind CSS         |
+| Database       | Neon Postgres        |
+| ORM            | Drizzle              |
+| Authentication | Neon Auth            |
+| Data Fetching  | TanStack React Query |
+| Validation     | Zod                  |
+| Forms          | React Hook Form      |
+| Email          | Resend               |
+| Scheduling     | Vercel Cron          |
+| Tests          | Vitest               |
+
+## Getting Started
+
+### 1. Install
 
 ```bash
 git clone <repo-url>
@@ -18,153 +46,204 @@ cd task-manager
 npm install
 ```
 
-**2. Create a Neon project** and run `db/schema.sql` in the Neon SQL editor.
-That file is the DDL source of truth — every statement is guarded, so it is safe
-to re-run whenever it changes.
+### 2. Configure Neon
 
-**3. Enable Auth** in the Neon console (Auth → Configuration).
+Create a Neon project and run `db/schema.sql` in the Neon SQL editor.
 
-**4. Configure the environment.**
+That file is the database DDL source of truth. The statements are guarded so it
+is safe to re-run whenever the schema changes.
+
+Then enable Neon Auth in the Neon dashboard.
+
+### 3. Configure Environment Variables
 
 ```bash
 cp .env.example .env.local
 ```
 
-| Variable | Required | Notes |
-| --- | --- | --- |
-| `DATABASE_URL` | yes | The **pooled** Neon string (host contains `-pooler`). |
-| `NEON_AUTH_BASE_URL` | yes | Neon console → Auth → Configuration. |
-| `NEON_AUTH_COOKIE_SECRET` | yes | 32+ chars: `openssl rand -base64 32`. |
-| `RESEND_API_KEY` | no | Email reminders only. |
-| `REMINDER_FROM_EMAIL` | no | Email reminders only. |
-| `CRON_SECRET` | no | Guards the reminder endpoint. |
-| `APP_URL` | no | Link target in reminder emails. |
+| Variable                  | Required | Description                   |
+| ------------------------- | :------: | ----------------------------- |
+| `DATABASE_URL`            | Yes      | Pooled Neon connection string |
+| `NEON_AUTH_BASE_URL`      | Yes      | Neon Auth configuration URL   |
+| `NEON_AUTH_COOKIE_SECRET` | Yes      | 32+ character secret          |
+| `RESEND_API_KEY`          | No       | Email reminder delivery       |
+| `REMINDER_FROM_EMAIL`     | No       | Reminder sender address       |
+| `CRON_SECRET`             | No       | Protects reminder endpoint    |
+| `APP_URL`                 | No       | Application URL for emails    |
 
-With the first three missing the app still boots in **preview mode**: the board
-renders, the sign-in guard stands down, and a banner says so. That is deliberate
-— it means the UI can be worked on before anyone has provisioned anything.
+Generate a cookie secret:
 
-**5. Run it.**
+```bash
+openssl rand -base64 32
+```
+
+The application also supports preview mode when the first three required
+variables are missing, so the UI can be developed before the backend is fully
+configured.
+
+### 4. Run
 
 ```bash
 npm run dev
 ```
 
-## Project structure
+Open `http://localhost:3000`.
 
-```
-__tests__/        unit tests for domain logic and validation
+## Project Structure
+
+```text
+__tests__/                  Unit tests for domain logic and validation
 app/
-  (app)/            board — the signed-in surface, guarded in its layout
-  (auth)/           login, signup, confirm-email
-  api/tasks/        task CRUD + the drag-and-drop status route
-  api/auth/         Neon Auth REST surface + sign-out
-  api/cron/         due-date reminder job
+  (app)/board/              Protected task board
+  (auth)/                   Login, signup, confirmation, forgot/reset password
+  api/
+    auth/                   Neon Auth and sign-out
+    cron/                   Reminder job
+    tasks/                  Task CRUD and status updates
 components/
-  auth/             login, signup, confirmation forms
-  layout/           TopBar, Notifications, ThemeToggle, UserMenu
-  tasks/            board, columns, cards, filters, list view, modals
-  ui/               generic primitives — Button, Input, Modal, Badge, …
+  auth/                     Authentication forms
+  layout/                   Header, notifications, theme, user menu
+  tasks/                    Board, columns, cards, filters, lists
+  ui/                       Generic UI components
+db/
+  schema.sql                PostgreSQL DDL source of truth
+docs/
+  legacy-supabase/          Supabase reference implementation, not active
+  neon-auth-notes.md        Neon Auth implementation notes
 hooks/
-  useTasks.ts       React Query task cache: fetch, mutate, optimistic moves
-  useBoardParams.ts board state read from and written back to the URL
+  useBoardParams.ts         URL-based board state
+  useTasks.ts               React Query cache and mutations
 lib/
-  api/              route-handler helpers (errors, serialization, shared parsing)
-  auth/             Neon Auth wiring, session reads, env guards
-  db/               Drizzle client, typed schema, owner-email upsert
-  email/            reminder digest builder + Resend delivery
-  validation/       zod schemas, parsed on both the client and the server
-  reminders.ts      one definition of "overdue" and "due soon"
-  types.ts          domain types, enums, and URL-param guards
-docs/               implementation notes and legacy migration references
-db/schema.sql       Postgres DDL — the source of truth
+  api/                      Route-handler helpers
+  auth/                     Neon Auth wiring, session reads, env guards
+  db/                       Drizzle client, typed schema, owner-email upsert
+  email/                    Reminder digest builder and Resend delivery
+  validation/               Zod schemas for client and server parsing
+  reminders.ts              Due-date logic
+  types.ts                  Domain types, enums, and URL-param guards
 ```
 
-`components/ui/` is strictly generic: nothing in it knows what a task is.
-Anything task-shaped (`DueBadge`, `PriorityBadge`) lives in `components/tasks/`.
+`components/ui/` contains only generic components. Task-specific components such
+as `DueBadge` and `PriorityBadge` live inside `components/tasks/`.
 
-## How it works
+## How It Works
 
-**The URL is the state.** Filters, search, sort, and board/list view all live in
-the query string, read and written through `useBoardParams`. A filtered board is
-therefore a link you can bookmark, share, or reload without losing your place.
-Defaults are omitted so the common case stays a clean `/board`.
+### URL as State
 
-**Ownership is enforced in the route handlers.** There is no row-level security:
-a plain Neon connection string authenticates as one role for the whole app, so
-an RLS policy would have nothing to compare against. Instead every query is
-scoped with `where user_id = <session user>`. That is a smaller loss than it
-sounds, because the browser never talks to the database — `app/api/*` is the
-only data path, so there is exactly one place to get it right.
+Search, filters, sorting, and board/list mode are stored in the URL through
+`useBoardParams`.
 
-**Validation runs twice.** The zod schemas in `lib/validation/` back the forms
-via `@hookform/resolvers` and are parsed again in every route handler. The
-client copy is a convenience; the server copy is the rule.
+Example:
 
-**Drag-and-drop is optimistic.** A card lands in its new column on the frame the
-pointer lifts: `useUpdateTaskStatus` patches every cached list first, then
-reconciles, and restores from a snapshot if the server disagrees. Positions use
-a gap strategy, so a reorder writes one row instead of renumbering the column.
+```text
+/board?status=in_progress&priority=high&sort=due_date
+```
 
-**Ticket numbers are assigned in the database.** A `BEFORE INSERT` trigger takes
-a per-user advisory lock and claims the next number, with a unique index as the
-backstop, so two tickets can never share one.
+This makes board views bookmarkable, shareable, and reload-safe.
 
-## Due date reminders
+### Ownership
 
-### In-app
+The browser never connects directly to the database.
 
-On by default. A dedicated **unfiltered** query counts open tickets that are
-overdue or due within 24 hours, so the counts describe every ticket you own
-rather than whatever the board's filters happen to show. That feeds the
-notification bell and one due-soon toast per browser session.
+Every API request:
 
-The stat row above the board is deliberately the other way round: it reports on
-the tickets currently in view, because it describes the board you are looking
-at. Cards carry a due badge and an overdue edge treatment.
+1. Authenticates the user.
+2. Validates the request.
+3. Scopes database queries to the authenticated `user_id`.
+4. Executes through Drizzle.
+
+```text
+Browser -> Next.js API -> Drizzle -> Neon Postgres
+```
+
+### Validation
+
+Zod validation runs on both the client and server.
+
+```text
+React Hook Form -> Zod -> User Input
+                         |
+                    API Request
+                         |
+                    Zod -> Database
+```
+
+Client validation improves the experience. Server validation is the actual rule.
+
+### Optimistic Drag and Drop
+
+When a task is moved, the UI updates immediately.
+
+`useUpdateTaskStatus` updates the React Query cache first, then reconciles with
+the server. If the request fails, the previous state is restored.
+
+Task positions use a gap strategy, so reordering generally updates only one
+database row.
+
+### Task Numbers
+
+Tasks receive a per-user sequential number:
+
+```text
+#TM-0001
+#TM-0002
+#TM-0003
+```
+
+Numbers are generated by a PostgreSQL `BEFORE INSERT` trigger using a per-user
+advisory lock and a unique index as a final safeguard.
+
+## Due-Date Reminders
+
+### In-App
+
+A dedicated unfiltered query tracks tasks that are:
+
+* Overdue.
+* Due within 24 hours.
+
+This powers the notification bell and due-soon toast.
+
+Board statistics remain filtered to the tasks currently visible.
 
 ### Email
 
-A once-daily digest of everything due in the next 24 hours, sent through Resend
-and triggered by Vercel Cron. **Entirely optional** — with the variables blank
-`/api/cron/reminders` reports itself unconfigured and nothing else changes.
+Email reminders are optional and use Resend plus Vercel Cron.
 
-1. Re-run `db/schema.sql` (adds `task_owners` and `tasks.reminder_sent_for`).
-2. Create a Resend account, verify a sending domain, create an API key.
-3. Fill in `RESEND_API_KEY`, `REMINDER_FROM_EMAIL`, `APP_URL`, `CRON_SECRET`.
-4. Deploy. `vercel.json` schedules the job daily at 08:00 UTC.
+The daily job sends tasks due within the next 24 hours.
 
-```bash
-curl -H "Authorization: Bearer $CRON_SECRET" https://your-app/api/cron/reminders
+Configure:
+
+```env
+RESEND_API_KEY=
+REMINDER_FROM_EMAIL=
+APP_URL=
+CRON_SECRET=
 ```
 
-**Why addresses live in this database.** Neon Auth keeps user records in its own
-service. Unlike legacy Neon Auth there is no `neon_auth.users_sync` table to
-join against, and the beta SDK's only user listing sits behind a
-session-authorized admin route — neither is reachable from a background job. So
-every authenticated page view records `user_id → email` into `task_owners`, and
-the job joins against that. Only verified addresses are stored, because the
-write happens after the layout's verification guard.
+The cron job runs daily at 08:00 UTC.
 
-**Why daily.** Vercel's Hobby plan allows one cron run per day and fails the
-deployment on anything more frequent, which is why the window is 24 hours.
-Delivery is best-effort — runs can be missed *or* repeated — so the job is
-idempotent: each ticket records the `due_date` it was last emailed about. A
-repeat run sends nothing, a missed run is caught by the next one, and moving a
-deadline re-arms the reminder on its own.
+To trigger it manually:
 
-Not on Vercel? Delete `vercel.json` and point any scheduler at the same URL once
-a day with the same `Authorization` header.
+```bash
+curl \
+  -H "Authorization: Bearer $CRON_SECRET" \
+  https://your-app/api/cron/reminders
+```
 
-## Notes
+The reminder system is idempotent, so repeated runs do not send duplicate
+reminders. Changing a task's due date automatically re-arms its reminder.
 
-`docs/legacy-supabase/` holds an earlier Supabase-targeted version of the reminder job. It
-cannot run against this project — it joins `auth.users`, and needs `pg_net`,
-which Neon does not offer — and is kept only as a record of that approach.
+`docs/legacy-supabase/` holds an earlier Supabase-targeted version of the
+reminder job. It cannot run against this project because it joins `auth.users`
+and needs `pg_net`, which Neon does not offer. It is kept only as a record of
+that approach.
 
 `docs/neon-auth-notes.md` covers the current Neon Auth and Next.js setup.
 
 ## Checks
+
+Run the local quality checks:
 
 ```bash
 npm run lint
@@ -172,3 +251,15 @@ npm run test
 npm run build
 npm audit
 ```
+
+## Deployment
+
+Deploy on Vercel with the environment variables above. Add the deployed app URL
+to Neon Auth trusted domains so authentication redirects are allowed.
+
+For password reset and email confirmation, make sure `APP_URL` points to the
+production deployment URL.
+
+---
+
+Built with Next.js, TypeScript, Tailwind, Drizzle, React Query, and Neon.
