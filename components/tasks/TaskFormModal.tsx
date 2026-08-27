@@ -25,7 +25,6 @@ import {
   STATUS_META,
   TASK_PRIORITIES,
   TASK_STATUSES,
-  formatTicketNumber,
   type Task,
 } from "@/lib/types";
 
@@ -101,8 +100,8 @@ export function TaskFormModal({ open, onClose, task }: TaskFormModalProps) {
         await updateTask.mutateAsync({ id: task.id, input });
         toast.success("Task updated");
       } else {
-        const created = await createTask.mutateAsync(input);
-        toast.success(`${formatTicketNumber(created.ticket_no)} created`);
+        await createTask.mutateAsync(input);
+        toast.success("Task created");
       }
 
       onClose();

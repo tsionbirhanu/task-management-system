@@ -64,7 +64,7 @@ export function SearchInput({
         placeholder={placeholder}
         className={cn(
           "h-10 w-full rounded-xl border border-line bg-ink/[0.025] pl-10 pr-9",
-          "font-body text-sm text-ink placeholder:font-mono placeholder:text-slate/60",
+          "font-body text-sm font-medium text-ink placeholder:text-slate/80",
           "transition-colors duration-150 ease-out hover:bg-paper",
           "focus-visible:border-line focus-visible:outline-none",
         )}
