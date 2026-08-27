@@ -3,6 +3,8 @@
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/Button";
@@ -21,6 +23,7 @@ const EMAIL_NOT_CONFIRMED =
   "Confirm your email with the code we sent before signing in.";
 
 export function LoginForm() {
+  const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
 
   const {
@@ -35,31 +38,35 @@ export function LoginForm() {
   async function onSubmit(values: SignInInput) {
     setFormError(null);
 
-    const { data, error } = await authClient.signIn.email({
-      email: values.email,
-      password: values.password,
-    });
-
-    if (error) {
-      setFormError(SIGN_IN_FAILED);
-      return;
-    }
-
-    const user = (data as { user?: { emailVerified?: boolean } } | null)?.user;
-    if (user?.emailVerified === false) {
-      await authClient.signOut();
-      await authClient.sendVerificationEmail({
+    try {
+      const { data, error } = await authClient.signIn.email({
         email: values.email,
-        callbackURL: "/login?created=1",
+        password: values.password,
       });
-      setFormError(EMAIL_NOT_CONFIRMED);
-      window.location.assign(
-        `/confirm-email?email=${encodeURIComponent(values.email)}`,
-      );
-      return;
-    }
 
-    window.location.assign("/board");
+      if (error) {
+        setFormError(SIGN_IN_FAILED);
+        return;
+      }
+
+      const user = (data as { user?: { emailVerified?: boolean } } | null)?.user;
+      if (user?.emailVerified === false) {
+        await authClient.signOut();
+        await authClient.sendVerificationEmail({
+          email: values.email,
+          callbackURL: "/login?created=1",
+        });
+        setFormError(EMAIL_NOT_CONFIRMED);
+        router.push(
+          `/confirm-email?email=${encodeURIComponent(values.email)}`,
+        );
+        return;
+      }
+
+      router.push("/board");
+    } catch {
+      setFormError(SIGN_IN_FAILED);
+    }
   }
 
   return (
@@ -82,6 +89,15 @@ export function LoginForm() {
         error={errors.password?.message}
         {...register("password")}
       />
+
+      <div className="-mt-1 flex justify-end">
+        <Link
+          href="/forgot-password"
+          className="rounded font-body text-xs font-bold text-progress underline-offset-4 hover:underline"
+        >
+          Forgot password?
+        </Link>
+      </div>
 
       {formError ? (
         <p

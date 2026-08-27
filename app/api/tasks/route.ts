@@ -1,4 +1,4 @@
-import { and, count, desc, eq, ilike, max, sql } from "drizzle-orm";
+import { and, count, desc, eq, ilike, sql } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import { ZodError } from "zod";
 
@@ -82,16 +82,11 @@ export async function POST(request: Request) {
 
     // Query
     const db = getDb();
-    const [{ nextTicketNo }] = await db
-      .select({ nextTicketNo: sql<number>`coalesce(${max(tasks.ticket_no)}, 0) + 1` })
-      .from(tasks)
-      .where(eq(tasks.user_id, user.id));
-
     const [created] = await db
       .insert(tasks)
       .values({
         user_id: user.id,
-        ticket_no: nextTicketNo,
+        ticket_no: sql`default`,
         title: input.title,
         description: input.description ?? null,
         status: input.status,

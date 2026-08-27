@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
@@ -30,6 +31,7 @@ const RESEND_FAILED =
   "We could not send a new code. Wait a minute and try again.";
 
 export function ConfirmEmailForm({ email = "" }: { email?: string }) {
+  const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
 
@@ -47,18 +49,22 @@ export function ConfirmEmailForm({ email = "" }: { email?: string }) {
     setFormError(null);
     setNotice(null);
 
-    const { error } = await authClient.emailOtp.verifyEmail({
-      email: values.email,
-      otp: values.otp,
-    });
+    try {
+      const { error } = await authClient.emailOtp.verifyEmail({
+        email: values.email,
+        otp: values.otp,
+      });
 
-    if (error) {
+      if (error) {
+        setFormError(VERIFY_FAILED);
+        return;
+      }
+
+      await authClient.signOut();
+      router.push("/login?created=1");
+    } catch {
       setFormError(VERIFY_FAILED);
-      return;
     }
-
-    await authClient.signOut();
-    window.location.assign("/login?created=1");
   }
 
   async function resendCode() {
@@ -73,17 +79,21 @@ export function ConfirmEmailForm({ email = "" }: { email?: string }) {
       return;
     }
 
-    const { error } = await authClient.sendVerificationEmail({
-      email: parsed.data.email,
-      callbackURL: "/login?created=1",
-    });
+    try {
+      const { error } = await authClient.sendVerificationEmail({
+        email: parsed.data.email,
+        callbackURL: "/login?created=1",
+      });
 
-    if (error) {
+      if (error) {
+        setFormError(RESEND_FAILED);
+        return;
+      }
+
+      setNotice("A new code has been sent.");
+    } catch {
       setFormError(RESEND_FAILED);
-      return;
     }
-
-    setNotice("A new code has been sent.");
   }
 
   return (

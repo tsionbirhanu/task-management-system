@@ -16,12 +16,9 @@ export default async function AuthLayout({
   if (user?.emailVerified) redirect("/board");
 
   return (
-    <main className="bg-blueprint flex min-h-screen items-center justify-center px-4 py-8">
-      <section className="flex w-full max-w-md flex-col justify-center">
-        {/* Same mark as the board's top bar -- one logo, defined the same way
-            in both places, so signing in and landing on the board look like the
-            same product. */}
-        <div className="mb-8 flex items-center justify-center gap-2">
+    <main className="bg-blueprint flex min-h-screen items-center justify-center px-4 py-8 sm:px-6">
+      <section className="w-full max-w-md">
+        <div className="mb-7 flex items-center justify-center gap-2">
           <span
             aria-hidden="true"
             className="grid h-8 w-8 place-items-center rounded-lg bg-progress text-paper shadow-ticket"
@@ -32,7 +29,8 @@ export default async function AuthLayout({
             Workbench
           </span>
         </div>
-        <div className="w-full rounded-[1.5rem] border border-line bg-paper p-6 shadow-ticket">
+
+        <div className="rounded-[1.15rem] border border-line bg-paper/95 p-6 shadow-panel backdrop-blur sm:p-7">
           {children}
         </div>
       </section>

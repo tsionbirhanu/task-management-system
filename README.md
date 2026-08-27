@@ -5,7 +5,7 @@ created, edited, dragged between columns, filtered, searched, sorted, and read
 in either board or list view. Every ticket gets a per-user work order number —
 your first is `#TM-0001`, and so is everyone else's.
 
-Built with Next.js 14 (App Router), TypeScript, Tailwind, Drizzle, React Query,
+Built with Next.js 16 (App Router), TypeScript, Tailwind, Drizzle, React Query,
 and Neon Postgres + Neon Auth.
 
 ## Setup
@@ -17,10 +17,6 @@ git clone <repo-url>
 cd task-manager
 npm install
 ```
-
-> `.npmrc` sets `legacy-peer-deps=true`. It is required: `@neondatabase/auth`
-> declares a peer of `next >= 16` and this project is on Next 14. See
-> `docs/neon-auth-notes.md` before removing it.
 
 **2. Create a Neon project** and run `db/schema.sql` in the Neon SQL editor.
 That file is the DDL source of truth — every statement is guarded, so it is safe
@@ -57,6 +53,7 @@ npm run dev
 ## Project structure
 
 ```
+__tests__/        unit tests for domain logic and validation
 app/
   (app)/            board — the signed-in surface, guarded in its layout
   (auth)/           login, signup, confirm-email
@@ -79,6 +76,7 @@ lib/
   validation/       zod schemas, parsed on both the client and the server
   reminders.ts      one definition of "overdue" and "due soon"
   types.ts          domain types, enums, and URL-param guards
+docs/               implementation notes and legacy migration references
 db/schema.sql       Postgres DDL — the source of truth
 ```
 
@@ -160,16 +158,17 @@ a day with the same `Authorization` header.
 
 ## Notes
 
-`supabase/` holds an earlier Supabase-targeted version of the reminder job. It
+`docs/legacy-supabase/` holds an earlier Supabase-targeted version of the reminder job. It
 cannot run against this project — it joins `auth.users`, and needs `pg_net`,
 which Neon does not offer — and is kept only as a record of that approach.
 
-`docs/neon-auth-notes.md` covers running `@neondatabase/auth` on Next 14: why
-there is no Edge middleware, and what to re-check on any upgrade.
+`docs/neon-auth-notes.md` covers the current Neon Auth and Next.js setup.
 
 ## Checks
 
 ```bash
 npm run lint
+npm run test
 npm run build
+npm audit
 ```

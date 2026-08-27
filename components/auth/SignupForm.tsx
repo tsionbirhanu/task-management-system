@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 
 import { Button } from "@/components/ui/Button";
@@ -17,6 +18,7 @@ const VERIFICATION_EMAIL_FAILED =
   "Your account was created, but we could not send the confirmation email. Try signing in, then request a new confirmation email.";
 
 export function SignupForm() {
+  const router = useRouter();
   const [formError, setFormError] = useState<string | null>(null);
 
   const {
@@ -31,41 +33,45 @@ export function SignupForm() {
   async function onSubmit(values: SignUpInput) {
     setFormError(null);
 
-    const { data, error } = await authClient.signUp.email({
-      name: values.name,
-      email: values.email,
-      password: values.password,
-    });
-
-    if (error) {
-      setFormError(SIGN_UP_FAILED);
-      return;
-    }
-
-    // Ask Neon Auth to send the confirmation message explicitly. Some project
-    // configurations create the user without auto-sending the verification mail.
-    const { error: verificationError } =
-      await authClient.sendVerificationEmail({
+    try {
+      const { data, error } = await authClient.signUp.email({
+        name: values.name,
         email: values.email,
-        callbackURL: "/login?created=1",
+        password: values.password,
       });
 
-    if (verificationError) {
-      setFormError(VERIFICATION_EMAIL_FAILED);
-      return;
+      if (error) {
+        setFormError(SIGN_UP_FAILED);
+        return;
+      }
+
+      // Ask Neon Auth to send the confirmation message explicitly. Some project
+      // configurations create the user without auto-sending the verification mail.
+      const { error: verificationError } =
+        await authClient.sendVerificationEmail({
+          email: values.email,
+          callbackURL: "/login?created=1",
+        });
+
+      if (verificationError) {
+        setFormError(VERIFICATION_EMAIL_FAILED);
+        return;
+      }
+
+      // A session token comes back only when the project has email confirmation
+      // switched off. Either way, signup should continue through the code screen.
+      const signedInImmediately = Boolean(
+        (data as { token?: string | null } | null)?.token,
+      );
+
+      if (signedInImmediately) await authClient.signOut();
+
+      router.push(
+        `/confirm-email?email=${encodeURIComponent(values.email)}`,
+      );
+    } catch {
+      setFormError(SIGN_UP_FAILED);
     }
-
-    // A session token comes back only when the project has email confirmation
-    // switched off. Either way, signup should continue through the code screen.
-    const signedInImmediately = Boolean(
-      (data as { token?: string | null } | null)?.token,
-    );
-
-    if (signedInImmediately) await authClient.signOut();
-
-    window.location.assign(
-      `/confirm-email?email=${encodeURIComponent(values.email)}`,
-    );
   }
 
   return (
@@ -77,7 +83,7 @@ export function SignupForm() {
       <Input
         label="Name"
         autoComplete="name"
-        placeholder="Sam Rivera"
+        placeholder="Tsion Birhanu"
         error={errors.name?.message}
         {...register("name")}
       />

@@ -1,29 +1,29 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 
-import { SignupForm } from "@/components/auth/SignupForm";
+import { ForgotPasswordForm } from "@/components/auth/ForgotPasswordForm";
 
 export const metadata: Metadata = {
-  title: "Create account | Workbench",
+  title: "Forgot password | Workbench",
 };
 
-export default function SignupPage() {
+export default function ForgotPasswordPage() {
   return (
     <>
       <p className="font-body text-xs font-bold text-progress">
-        Start organized
+        Account recovery
       </p>
       <h1 className="mt-2 font-body text-2xl font-bold text-ink">
-        Create your account
+        Reset your password
       </h1>
       <p className="mt-2 font-body text-sm leading-6 text-slate">
-        Start tracking work orders in a couple of minutes.
+        Enter your email and we will send a 6-digit reset code.
       </p>
 
-      <SignupForm />
+      <ForgotPasswordForm />
 
       <p className="mt-5 font-body text-sm text-slate">
-        Already have an account?{" "}
+        Remembered it?{" "}
         <Link href="/login" className="rounded font-bold text-ink underline">
           Sign in
         </Link>

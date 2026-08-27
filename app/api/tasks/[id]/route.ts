@@ -21,7 +21,7 @@ const { tasks } = schema;
 export async function GET(_request: Request, context: TaskRouteContext) {
   try {
     // Parse
-    const { id } = taskIdParamsSchema.parse(context.params);
+    const { id } = taskIdParamsSchema.parse(await context.params);
 
     // Authorize
     const user = await getCurrentUser();
@@ -51,7 +51,7 @@ export async function GET(_request: Request, context: TaskRouteContext) {
 export async function PATCH(request: Request, context: TaskRouteContext) {
   try {
     // Parse
-    const { id } = taskIdParamsSchema.parse(context.params);
+    const { id } = taskIdParamsSchema.parse(await context.params);
     const body = await parseJson(request);
     const input = updateTaskSchema.parse(body);
 
@@ -83,7 +83,7 @@ export async function PATCH(request: Request, context: TaskRouteContext) {
 export async function DELETE(_request: Request, context: TaskRouteContext) {
   try {
     // Parse
-    const { id } = taskIdParamsSchema.parse(context.params);
+    const { id } = taskIdParamsSchema.parse(await context.params);
 
     // Authorize
     const user = await getCurrentUser();

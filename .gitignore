@@ -13,6 +13,9 @@
 /.next/
 /out/
 
+# legacy local workspace folders
+/supabase/
+
 # production
 /build
 

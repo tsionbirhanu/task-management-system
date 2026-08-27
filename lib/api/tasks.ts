@@ -58,7 +58,7 @@ export const taskIdParamsSchema = z.object({
 });
 
 export interface TaskRouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 export function serializeTask(task: TaskRow): Task {

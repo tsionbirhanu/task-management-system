@@ -21,18 +21,15 @@ function readStoredTheme(): ThemeMode {
   const stored = window.localStorage.getItem(STORAGE_KEY);
   if (stored === "dark" || stored === "light") return stored;
 
-  return window.matchMedia("(prefers-color-scheme: dark)").matches
-    ? "dark"
-    : "light";
+  return "light";
 }
 
 /**
  * Light/dark toggle.
  *
- * The document is already painted with the right theme before React runs -- an
- * inline script in the root layout does that to avoid a flash -- so this starts
- * at "light" and corrects itself on mount rather than trying to guess during
- * render, which would mismatch the server HTML.
+ * The document is already painted with the saved theme before React runs -- an
+ * inline script in the root layout does that to avoid a flash. With nothing
+ * saved, Workbench starts in light mode.
  */
 export function ThemeToggle() {
   const [theme, setTheme] = useState<ThemeMode>("light");

@@ -20,7 +20,7 @@ const { tasks } = schema;
 export async function PATCH(request: Request, context: TaskRouteContext) {
   try {
     // Parse
-    const { id } = taskIdParamsSchema.parse(context.params);
+    const { id } = taskIdParamsSchema.parse(await context.params);
     const body = await parseJson(request);
     const input = updateTaskStatusSchema.parse(body);
 

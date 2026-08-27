@@ -33,7 +33,7 @@ function isNotPastDate(value: string): boolean {
   return due.getTime() >= today.getTime();
 }
 
-export const createTaskSchema = z.object({
+const taskInputFields = {
   title: z
     .string()
     .trim()
@@ -44,14 +44,23 @@ export const createTaskSchema = z.object({
     .trim()
     .max(2000, "Descriptions are capped at 2000 characters.")
     .nullish(),
+  due_date: dueDateSchema.refine((value) => !value || isNotPastDate(value), {
+    message: "Due date cannot be in the past.",
+  }),
+};
+
+export const createTaskSchema = z.object({
+  ...taskInputFields,
   status: taskStatusSchema.default("todo"),
   priority: taskPrioritySchema.default("medium"),
-  due_date: dueDateSchema.refine((value) => !value || isNotPastDate(value), {
-      message: "Due date cannot be in the past.",
-    }),
 });
 
-export const updateTaskSchema = createTaskSchema
+export const updateTaskSchema = z
+  .object({
+    ...taskInputFields,
+    status: taskStatusSchema,
+    priority: taskPrioritySchema,
+  })
   .partial()
   .refine((value) => Object.keys(value).length > 0, {
     message: "Include at least one field to update.",
