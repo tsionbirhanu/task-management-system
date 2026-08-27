@@ -2,24 +2,11 @@
 
 Workbench is a responsive task management system for creating, organizing, and
 tracking personal work. It includes authentication, task CRUD, filtering,
-search, drag-and-drop status updates, and due-date reminders.
+search, drag-and-drop status updates, due-date reminders, and light/dark theme
+support.
 
 The project is built with Next.js 16 App Router, TypeScript, Tailwind CSS,
 Drizzle ORM, TanStack React Query, Neon Postgres, and Neon Auth.
-
-## Challenge Coverage
-
-| Requirement | Status | Implementation |
-| --- | --- | --- |
-| User authentication | Complete | Signup, login, email confirmation, forgot password, reset password, and protected routes |
-| Secure session management | Complete | Neon Auth session cookies handled through server-side route protection |
-| Task CRUD | Complete | Users can create, view, edit, and delete their own tasks |
-| Task attributes | Complete | Title, description, status, priority, due date, position, and per-user task number |
-| Filtering and search | Complete | Search by title, filter by status and priority, and sort tasks |
-| API/backend | Complete | REST endpoints with Zod validation and user-scoped database queries |
-| UI/UX | Complete | Clean light theme, responsive layout, board/list views, and polished auth screens |
-| Drag-and-drop bonus | Complete | Kanban drag-and-drop with optimistic UI updates |
-| Reminder bonus | Complete | In-app due-soon/overdue notifications and optional scheduled email reminders |
 
 ## Features
 
@@ -32,6 +19,7 @@ Drizzle ORM, TanStack React Query, Neon Postgres, and Neon Auth.
 * Task attributes for title, description, status, priority, due date, and task number.
 * In-app notifications for overdue tasks and tasks due within 24 hours.
 * Optional daily email reminders through Resend and Vercel Cron.
+* Light theme by default with a dark mode toggle.
 * URL-based board state, so search/filter/sort/view settings survive reloads.
 * Centralized validation shared by client forms and API routes.
 
@@ -213,13 +201,15 @@ the rest of the app still works normally.
 
 ### Responsive UI
 
-The interface is designed for phone, tablet, and desktop screens:
+The interface is designed for phone, tablet, and desktop screens, with light and
+dark themes available:
 
 * Auth pages use a single centered card.
 * Filters stack on small screens and become denser on larger screens.
 * Board view shows one active status column on mobile and three columns on desktop.
 * List view uses mobile cards below `sm` and a horizontally protected table above `sm`.
 * Modals behave like mobile bottom sheets and desktop dialogs.
+* The app defaults to light mode and lets users switch to dark mode from the top bar.
 
 ## Quality Checks
 
